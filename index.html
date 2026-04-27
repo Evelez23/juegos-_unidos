@@ -1590,8 +1590,8 @@
                 <h1>☔ Lluvia de Letras</h1>
                 <p class="subtitle" id="ll_subtitle">Atrapa la letra correcta</p>
                 <div class="lang-selector" id="ll_langSelector">
-                    <button class="lang-btn active" onclick="gc_setLangAndRefresh('es')">🇪🇸 Español</button>
-                    <button class="lang-btn" onclick="gc_setLangAndRefresh('en')">🇺🇸 English</button>
+                    <button class="lang-btn active" data-lang="es" onclick="gc_setLangAndRefresh('es')">🇪🇸 Español</button>
+                    <button class="lang-btn" data-lang="en" onclick="gc_setLangAndRefresh('en')">🇺🇸 English</button>
                 </div>
             </div>
             <div class="score-board">
@@ -1622,8 +1622,8 @@
                 <h1>🧩 Palabras Escondidas</h1>
                 <p class="subtitle" id="pe_subtitle">Ordena las letras</p>
                 <div class="lang-selector" id="pe_langSelector">
-                    <button class="lang-btn active" onclick="gc_setLangAndRefresh('es')">🇪🇸 Español</button>
-                    <button class="lang-btn" onclick="gc_setLangAndRefresh('en')">🇺🇸 English</button>
+                    <button class="lang-btn active" data-lang="es" onclick="gc_setLangAndRefresh('es')">🇪🇸 Español</button>
+                    <button class="lang-btn" data-lang="en" onclick="gc_setLangAndRefresh('en')">🇺🇸 English</button>
                 </div>
             </div>
             <div class="score-board">
@@ -1924,7 +1924,7 @@
                 document.getElementById('palabras-app').style.display = 'block';
                 pe_startGame();
             } else {
-                window.location.href = 'aventura_alfabeto (2).html';
+                window.location.href = 'aventura_alfabeto_2.html';
             }
         }
         
@@ -2512,8 +2512,7 @@
         function gc_setLangAndRefresh(lang) {
             gameCore.setLanguage(lang);
             document.querySelectorAll('#ll_langSelector .lang-btn, #pe_langSelector .lang-btn').forEach((btn) => {
-                const isEs = btn.textContent.includes('Español');
-                btn.classList.toggle('active', (lang === 'es' && isEs) || (lang === 'en' && !isEs));
+                btn.classList.toggle('active', btn.dataset.lang === lang);
             });
             gc_refreshHeaderLabels();
             if (document.getElementById('palabras-app').style.display === 'block') pe_nextWord();
@@ -2748,7 +2747,16 @@
                 pe_state.slots[emptyIdx] = val;
                 pe_state.letters[idx] = null;
                 const expected = pe_state.currentWord[emptyIdx];
-                if(window.ah_playSound) ah_playSound(expected === val ? 'correct' : 'wrong');
+                if (expected !== val) {
+                    if (window.ah_initAudio) ah_initAudio();
+                    if (window.ah_playSound) ah_playSound('wrong');
+                    const msg = document.getElementById('pe_prizeMsg');
+                    msg.style.display = 'block';
+                    msg.textContent = t('wrong');
+                    setTimeout(() => { msg.style.display = 'none'; }, 900);
+                } else {
+                    if(window.ah_playSound) ah_playSound('correct');
+                }
                 pe_render();
                 pe_checkWin();
             }
