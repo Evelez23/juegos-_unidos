@@ -1588,7 +1588,11 @@
         <div class="game-container">
             <div class="header">
                 <h1>☔ Lluvia de Letras</h1>
-                <p class="subtitle">Atrapa la letra correcta</p>
+                <p class="subtitle" id="ll_subtitle">Atrapa la letra correcta</p>
+                <div class="lang-selector" id="ll_langSelector">
+                    <button class="lang-btn active" onclick="gc_setLangAndRefresh('es')">🇪🇸 Español</button>
+                    <button class="lang-btn" onclick="gc_setLangAndRefresh('en')">🇺🇸 English</button>
+                </div>
             </div>
             <div class="score-board">
                 <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="ll_score">0</div></div></div>
@@ -1616,7 +1620,11 @@
         <div class="game-container">
             <div class="header">
                 <h1>🧩 Palabras Escondidas</h1>
-                <p class="subtitle">Ordena las letras</p>
+                <p class="subtitle" id="pe_subtitle">Ordena las letras</p>
+                <div class="lang-selector" id="pe_langSelector">
+                    <button class="lang-btn active" onclick="gc_setLangAndRefresh('es')">🇪🇸 Español</button>
+                    <button class="lang-btn" onclick="gc_setLangAndRefresh('en')">🇺🇸 English</button>
+                </div>
             </div>
             <div class="score-board">
                 <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="pe_score">0</div></div></div>
@@ -2505,6 +2513,17 @@
         const ll_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         let ll_gameLoop, ll_spawnTimer;
 
+        function gc_setLangAndRefresh(lang) {
+            gameCore.setLanguage(lang);
+            document.querySelectorAll('#ll_langSelector .lang-btn, #pe_langSelector .lang-btn').forEach((btn) => {
+                const isEs = btn.textContent.includes('Español');
+                btn.classList.toggle('active', (lang === 'es' && isEs) || (lang === 'en' && !isEs));
+            });
+            gc_refreshHeaderLabels();
+            if (document.getElementById('palabras-app').style.display === 'block') pe_nextWord();
+            if (document.getElementById('lluvia-app').style.display === 'block') ll_nextTarget();
+        }
+
         function gc_refreshHeaderLabels() {
             document.querySelectorAll('#lluvia-app .label, #palabras-app .label').forEach((el) => {
                 if (el.textContent.includes('Puntos') || el.textContent.includes('Points')) el.textContent = t('points');
@@ -2513,6 +2532,10 @@
             });
             const llTitle = document.querySelector('.ll-target-display');
             if (llTitle) llTitle.childNodes[0].nodeValue = t('catch_letter') + ': ';
+            const llSub = document.getElementById('ll_subtitle');
+            if (llSub) llSub.textContent = gameCore.settings.language === 'en' ? 'Catch the correct letter' : 'Atrapa la letra correcta';
+            const peSub = document.getElementById('pe_subtitle');
+            if (peSub) peSub.textContent = gameCore.settings.language === 'en' ? 'Order the letters' : 'Ordena las letras';
         }
 
         function ll_pickAdaptiveLetter() {
@@ -2656,12 +2679,19 @@
         }
 
         // ==================== PALABRAS ESCONDIDAS JS ====================
-        const pe_WORDS = [
-            { w: 'SOL', e: '☀️' }, { w: 'PAN', e: '🍞' }, { w: 'GATO', e: '🐱' },
-            { w: 'CASA', e: '🏠' }, { w: 'FLOR', e: '🌸' }, { w: 'LUNA', e: '🌙' },
-            { w: 'PERRO', e: '🐶' }, { w: 'ARBOL', e: '🌳' }, { w: 'MESA', e: '🪑' },
-            { w: 'PLANETA', e: '🪐' }, { w: 'ELEFANTE', e: '🐘' }, { w: 'ESCUELA', e: '🏫' }
-        ];
+        function pe_getWordsFromAhorcado() {
+            const lang = gameCore.settings.language || 'es';
+            const pool = [];
+            Object.keys(ah_WORDS).forEach((category) => {
+                const entries = (ah_WORDS[category] && ah_WORDS[category][lang]) || [];
+                entries.forEach((entry) => {
+                    const clean = String(entry.word || '').toUpperCase();
+                    if (!clean) return;
+                    pool.push({ w: clean.replace(/\s/g, ''), e: entry.emoji || '🔤' });
+                });
+            });
+            return pool;
+        }
         let pe_state = { currentWord: '', letters: [], slots: [] };
         
         function pe_startGame() {
@@ -2676,8 +2706,9 @@
         function pe_nextWord() {
             document.getElementById('pe_winOverlay').classList.remove('show');
             document.getElementById('pe_prizeMsg').style.display = 'none';
-            const allowed = pe_WORDS.filter((obj) => gameCore.canUseWord(obj.w));
-            const source = allowed.length ? allowed : pe_WORDS;
+            const sourceAll = pe_getWordsFromAhorcado();
+            const allowed = sourceAll.filter((obj) => gameCore.canUseWord(obj.w));
+            const source = allowed.length ? allowed : sourceAll;
             let wordObj = source[Math.floor(Math.random() * source.length)];
             pe_state.currentWord = wordObj.w;
             document.getElementById('pe_hint').textContent = wordObj.e;
