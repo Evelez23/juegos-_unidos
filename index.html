@@ -1596,6 +1596,9 @@
                 <div class="score-item"><span class="icon">🎯</span><div><div class="label">Nivel</div><div class="value" id="ll_level">1</div></div></div>
             </div>
             <div class="ll-target-display">Atrapa la letra: <span id="ll_targetLetter" style="font-size: 3rem;">A</span></div>
+            <div style="text-align:center; margin-top: 8px;">
+                <button class="restart-btn" id="ll_resetBtn" onclick="ll_restartFromLevelOne()" style="padding:8px 16px; font-size:0.9rem;">Reiniciar nivel 1</button>
+            </div>
             <div class="ll-area" id="ll_area"></div>
         </div>
         
@@ -2372,7 +2375,7 @@
 
         function ah_resetHangman() {
             for (let i = 0; i < 10; i++) {
-                const part = document.getElementById(`part${i}`);
+                const part = document.getElementById(`ah_part${i}`);
                 if (part) part.classList.remove('show');
             }
         }
@@ -2380,7 +2383,7 @@
         function ah_updateHangman() {
             const wrongCount = ah_gameState.wrongLetters.length;
             for (let i = 0; i < wrongCount && i < 10; i++) {
-                const part = document.getElementById(`part${i}`);
+                const part = document.getElementById(`ah_part${i}`);
                 if (part) part.classList.add('show');
             }
         }
@@ -2482,7 +2485,6 @@
         // ==================== INIT ====================
         ah_createStars();
         ah_buildKeyboard();
-        ah_nextWord();
 
         // Keyboard support
         document.addEventListener('keydown', (e) => {
@@ -2530,6 +2532,13 @@
             if(ll_spawnTimer) clearTimeout(ll_spawnTimer);
             ll_loop();
             ll_scheduleSpawn();
+        }
+
+        function ll_restartFromLevelOne() {
+            gameCore.player.level = 1;
+            gameCore.player.lives = 3;
+            gameCore.saveGame();
+            ll_startGame();
         }
 
         function ll_nextTarget() {
@@ -2707,7 +2716,8 @@
             if(emptyIdx !== -1) {
                 pe_state.slots[emptyIdx] = val;
                 pe_state.letters[idx] = null;
-                if(window.ah_playSound) ah_playSound('correct');
+                const expected = pe_state.currentWord[emptyIdx];
+                if(window.ah_playSound) ah_playSound(expected === val ? 'correct' : 'wrong');
                 pe_render();
                 pe_checkWin();
             }
