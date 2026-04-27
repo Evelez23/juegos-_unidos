@@ -1913,7 +1913,11 @@
                 document.getElementById('palabras-app').style.display = 'block';
                 pe_startGame();
             } else {
-                window.location.href = 'aventura_alfabeto (2).html';
+                document.getElementById('alfabeto-app').style.display = 'block';
+                // stop startScreen from blocking
+                const scr = document.getElementById('al_startScreen');
+                if(scr) scr.classList.remove('hidden');
+                try { if(al_audioCtx) al_audioCtx.resume(); } catch(e){}
             }
         }
         
@@ -3432,6 +3436,17 @@
         }
 
         al_createStars();
+
+        window.addEventListener('load', () => {
+            showMainMenu();
+            openGame('alfabeto');
+            const back = document.getElementById('mainBackBtn');
+            if (back) {
+                back.style.display = 'block';
+                back.textContent = '🏠 Volver a Juegos Unidos';
+                back.onclick = () => { window.location.href = 'index.html'; };
+            }
+        });
     
         
     </script>
