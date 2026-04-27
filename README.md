@@ -1,4 +1,4 @@
-Proyecto Autora – Plataforma de Aprendizaje Infantil
+Proyecto Aurora – Plataforma de Aprendizaje Infantil
 
 Aplicación educativa interactiva diseñada para ayudar a niños a reconocer letras, mejorar la memoria y construir palabras de forma progresiva y adaptativa.
 
