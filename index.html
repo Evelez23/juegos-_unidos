@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
     <title>Juegos Aurora</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -3142,9 +3143,8 @@
                 
                 // Show custom Level Complete overlay
                 document.getElementById('al_gameOverTitle').textContent = '¡Nivel ' + (al_gameState.level - 1) + ' Completado! 🎉';
-                let btn = document.querySelector('#gameOver .restart-btn');
-                let old_onclick = btn.getAttribute('onclick');
-                btn.textContent = 'Siguiente Nivel 🚀';
+                let btn = document.querySelector('#al_gameOver .restart-btn');
+                if (btn) btn.textContent = 'Siguiente Nivel 🚀';
                 
                 document.getElementById('al_finalScore').textContent = al_gameState.score;
                 document.getElementById('al_finalStreak').textContent = al_gameState.bestStreak;
