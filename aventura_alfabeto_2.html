@@ -1631,6 +1631,9 @@
                 <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="pe_score">0</div></div></div>
                 <div class="score-item"><span class="icon">🎯</span><div><div class="label">Nivel</div><div class="value" id="pe_level">1</div></div></div>
             </div>
+            <div style="text-align:center; margin: 6px 0 12px;">
+                <button class="restart-btn" id="pe_resetBtn" onclick="pe_restartFromLevelOne()" style="padding:8px 16px; font-size:0.9rem;">Reiniciar nivel 1</button>
+            </div>
             
             <div class="game-area">
                 <div class="word-display" style="background: none; border: none; box-shadow: none;">
@@ -2694,6 +2697,12 @@
         }
         let pe_state = { currentWord: '', letters: [], slots: [] };
         
+        function pe_restartFromLevelOne() {
+            gameCore.player.level = 1;
+            gameCore.saveGame();
+            pe_startGame();
+        }
+
         function pe_startGame() {
             gameCore.player.level = Math.max(1, gameCore.player.level);
             pe_state = { currentWord: '', letters: [], slots: [] };
@@ -2727,7 +2736,15 @@
                 let div = document.createElement('div');
                 div.className = 'pe-slot' + (val ? ' filled' : '');
                 div.textContent = val;
-                if(val) div.onclick = () => pe_slotClick(i);
+                if (val) {
+                    div.onclick = () => pe_slotClick(i);
+                    let holdTimer;
+                    div.onpointerdown = () => {
+                        holdTimer = setTimeout(() => pe_slotClick(i), 350);
+                    };
+                    div.onpointerup = () => clearTimeout(holdTimer);
+                    div.onpointerleave = () => clearTimeout(holdTimer);
+                }
                 slotsDiv.appendChild(div);
             });
             
