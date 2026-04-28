@@ -1198,24 +1198,159 @@
             pe_render();
         }
         
-        function pe_render() {
-            let slotsDiv = document.getElementById('pe_wordSlots');
-            slotsDiv.innerHTML = '';
-            pe_state.slots.forEach((val, i) => {
-                let div = document.createElement('div');
-                div.className = 'pe-slot' + (val ? ' filled' : '');
-                div.textContent = val;
-                if (val) {
-                    div.onclick = () => pe_slotClick(i);
-                    let holdTimer;
-                    div.onpointerdown = () => {
-                        holdTimer = setTimeout(() => pe_slotClick(i), 350);
-                    };
-                    div.onpointerup = () => clearTimeout(holdTimer);
-                    div.onpointerleave = () => clearTimeout(holdTimer);
+     function pe_render() {
+    let slotsDiv = document.getElementById('pe_wordSlots');
+    slotsDiv.innerHTML = '';
+    pe_state.slots.forEach((val, i) => {
+        let div = document.createElement('div');
+        div.className = 'pe-slot' + (val ? ' filled' : '');
+        div.textContent = val || '';
+        if (val) {
+            // Mantener presionado para devolver la letra
+            let pressTimer;
+            let isLongPress = false;
+            
+            div.onpointerdown = () => {
+                pressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    div.style.transform = 'scale(0.95)';
+                    pe_returnLetterToLetters(i);
+                }, 400);
+            };
+            
+            div.onpointerup = () => {
+                clearTimeout(pressTimer);
+                div.style.transform = '';
+                if (!isLongPress) {
+                    pe_slotClick(i);
                 }
-                slotsDiv.appendChild(div);
-            });
+                isLongPress = false;
+            };
+            
+            div.onpointerleave = () => {
+                clearTimeout(pressTimer);
+                div.style.transform = '';
+                isLongPress = false;
+            };
+        }
+        slotsDiv.appendChild(div);
+    });
+    
+    let lettersDiv = document.getElementById('pe_lettersArea');
+    lettersDiv.innerHTML = '';
+    pe_state.letters.forEach((val, i) => {
+        let btn = document.createElement('button');
+        btn.className = 'pe-letter-btn' + (val === null ? ' hidden' : '');
+        btn.textContent = val;
+        if(val !== null) {
+            btn.onclick = () => pe_letterClick(i);
+            // Animación al presionar
+            btn.onpointerdown = () => btn.style.transform = 'scale(0.9)';
+            btn.onpointerup = () => btn.style.transform = '';
+            btn.onpointerleave = () => btn.style.transform = '';
+        }
+        lettersDiv.appendChild(btn);
+    });
+    
+    document.getElementById('pe_score').textContent = gameCore.player.score;
+    document.getElementById('pe_level').textContent = gameCore.player.level;
+}
+
+// NUEVA FUNCIÓN: Devolver letra del slot a las letras disponibles
+function pe_returnLetterToLetters(slotIndex) {
+    let letter = pe_state.slots[slotIndex];
+    if (!letter) return;
+    
+    // Buscar la primera posición vacía en letters
+    let emptyIndex = pe_state.letters.indexOf(null);
+    if (emptyIndex !== -1) {
+        pe_state.letters[emptyIndex] = letter;
+        pe_state.slots[slotIndex] = '';
+        
+        // Efecto visual
+        const slotEl = document.querySelectorAll('#pe_wordSlots .pe-slot')[slotIndex];
+        if (slotEl) {
+            slotEl.style.animation = 'popOut 0.2s ease-out';
+            setTimeout(() => {
+                slotEl.style.animation = '';
+            }, 200);
+        }
+        
+        if(window.ah_playSound) ah_playSound('wrong');
+        pe_render();
+        
+        // Limpiar errores visuales si los había
+        document.querySelectorAll('.pe-slot.error').forEach(el => {
+            el.classList.remove('error');
+        });
+    }
+}
+
+// Mejorar pe_letterClick para mejor feedback visual
+function pe_letterClick(idx) {
+    let val = pe_state.letters[idx];
+    let emptyIdx = pe_state.slots.indexOf('');
+    if(emptyIdx !== -1) {
+        pe_state.slots[emptyIdx] = val;
+        pe_state.letters[idx] = null;
+        
+        // Efecto visual de colocación
+        const slotEl = document.querySelectorAll('#pe_wordSlots .pe-slot')[emptyIdx];
+        if (slotEl) {
+            slotEl.style.animation = 'popIn 0.2s ease-out';
+            setTimeout(() => slotEl.style.animation = '', 200);
+        }
+        
+        const expected = pe_state.currentWord[emptyIdx];
+        if (expected !== val) {
+            pe_playHardError();
+            
+            // Marcar error visual
+            if (slotEl) slotEl.classList.add('error');
+            
+            const msg = document.getElementById('pe_prizeMsg');
+            msg.style.display = 'block';
+            msg.textContent = '❌ ' + t('wrong');
+            
+            pe_render();
+            
+            // Mantener el error visible pero permitir corrección
+            setTimeout(() => {
+                msg.style.display = 'none';
+                // No limpiar el error automáticamente - el usuario debe corregirlo
+            }, 900);
+        } else {
+            if(window.ah_playSound) ah_playSound('correct');
+            pe_render();
+            pe_checkWin();
+        }
+    }
+}
+
+// Mejorar pe_slotClick (click normal para mover letra)
+function pe_slotClick(idx) {
+    let val = pe_state.slots[idx];
+    if(val) {
+        let emptyIdx = pe_state.letters.indexOf(null);
+        if(emptyIdx !== -1) {
+            pe_state.letters[emptyIdx] = val;
+            pe_state.slots[idx] = '';
+            
+            // Efecto visual
+            const slotEl = document.querySelectorAll('#pe_wordSlots .pe-slot')[idx];
+            if (slotEl) {
+                slotEl.style.animation = 'popOut 0.2s ease-out';
+                setTimeout(() => slotEl.style.animation = '', 200);
+            }
+            
+            if(window.ah_playSound) ah_playSound('wrong');
+            pe_render();
+            
+            // Limpiar error visual de este slot
+            if (slotEl) slotEl.classList.remove('error');
+        }
+    }
+}
             
             let lettersDiv = document.getElementById('pe_lettersArea');
             lettersDiv.innerHTML = '';
