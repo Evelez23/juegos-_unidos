@@ -15,7 +15,7 @@
     </div>
     <div class="stars" id="global-stars"></div>
 
-    <button id="mainBackBtn" class="back-btn" onclick="showMainMenu()">🏠 Volver al Menú</button>
+    <button id="mainBackBtn" class="back-btn" onclick="window.location.href='index.html'">🏠 Volver al Menú</button>
 
     <!-- Main Menu -->
     <div id="main-menu" class="main-menu">
@@ -243,6 +243,10 @@
 
     <!-- Alfabeto Container -->
     <div id="alfabeto-app">
+    <div id="al_topMenu" style="position:fixed; top:18px; right:18px; z-index:2100; display:flex; gap:8px;">
+        <button class="restart-btn" onclick="window.location.href='index.html'" style="padding:10px 16px; font-size:0.9rem;">🏠 Menú principal</button>
+        <button class="restart-btn" onclick="al_showToast('Atajos: M menú, R reiniciar, L idioma')" style="padding:10px 12px; font-size:0.85rem;">⌨️ Atajos</button>
+    </div>
         
     <div class="bg-animation">
         <div class="bubble"></div>
@@ -394,14 +398,11 @@
                 document.getElementById('palabras-app').style.display = 'block';
                 pe_startGame();
             } else {
-                const isStandaloneAl = window.location.pathname.includes('aventura_alfabeto_2.html');
-                if (isStandaloneAl) {
-                    document.getElementById('alfabeto-app').style.display = 'block';
-                    const scr = document.getElementById('al_startScreen');
-                    if (scr) scr.classList.remove('hidden');
-                } else {
-                    window.location.href = 'aventura_alfabeto_2.html';
-                }
+                document.getElementById('alfabeto-app').style.display = 'block';
+                // stop startScreen from blocking
+                const scr = document.getElementById('al_startScreen');
+                if(scr) scr.classList.remove('hidden');
+                try { if(al_audioCtx) al_audioCtx.resume(); } catch(e){}
             }
         }
         
@@ -1996,6 +1997,77 @@
         }
 
         al_createStars();
+
+        function al_showToast(text) {
+            const toast = document.createElement('div');
+            toast.textContent = text;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.zIndex = '3000';
+            toast.style.padding = '10px 14px';
+            toast.style.borderRadius = '12px';
+            toast.style.background = 'rgba(0,0,0,0.75)';
+            toast.style.color = '#fff';
+            toast.style.fontWeight = '700';
+            toast.style.fontSize = '0.85rem';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 1300);
+        }
+
+        window.addEventListener('load', () => {
+            // Standalone mode: only Alfabeto screen should be active
+            const hide = ['main-menu', 'ahorcado-app', 'lluvia-app', 'palabras-app'];
+            hide.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+
+            const alApp = document.getElementById('alfabeto-app');
+            if (alApp) alApp.style.display = 'block';
+
+            const back = document.getElementById('mainBackBtn');
+            if (back) {
+                back.style.display = 'block';
+                back.textContent = '🏠 Volver a Juegos Unidos';
+                back.onclick = () => { window.location.href = 'index.html'; };
+            }
+
+            const startScreen = document.getElementById('al_startScreen');
+            const gameContainer = document.getElementById('al_gameContainer');
+            if (startScreen) startScreen.classList.remove('hidden');
+            if (gameContainer) gameContainer.style.display = 'none';
+
+            const startBtn = document.getElementById('al_startBtn');
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.style.pointerEvents = 'auto';
+                startBtn.style.opacity = '1';
+            }
+
+            document.addEventListener('keydown', (e) => {
+                const key = (e.key || '').toLowerCase();
+                if (key === 'm') {
+                    window.location.href = 'index.html';
+                }
+                if (key === 'r' && document.getElementById('alfabeto-app').style.display !== 'none') {
+                    if (document.getElementById('al_gameOver').classList.contains('show')) {
+                        al_restartGame();
+                    } else if (document.getElementById('al_gameContainer').style.display === 'flex') {
+                        al_resetGame();
+                        al_nextRound();
+                    }
+                    al_showToast('Reinicio rápido');
+                }
+                if (key === 'l') {
+                    const nextLang = gameCore.settings.language === 'es' ? 'en' : 'es';
+                    gameCore.setLanguage(nextLang);
+                    al_setLanguage(nextLang);
+                    al_showToast('Idioma: ' + (nextLang === 'es' ? 'Español' : 'English'));
+                }
+            });
+        });
     
         
     </script>
