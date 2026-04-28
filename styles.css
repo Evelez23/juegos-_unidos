@@ -1529,3 +1529,50 @@
         .collection-item { border-radius: 12px; padding: 8px; text-align: center; font-size: 1.5rem; background: rgba(0,0,0,0.25); }
         .collection-item .name { display: block; font-size: 0.75rem; color: #ddd; }
         .collection-item.locked { filter: grayscale(1); opacity: 0.5; }
+/* Añadir al final de styles.css */
+.pe-slot {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.pe-slot:active {
+    transform: scale(0.95);
+}
+
+.pe-slot.error {
+    border-color: #e74c3c !important;
+    background: rgba(231, 76, 60, 0.2);
+    animation: shakeError 0.3s ease-in-out;
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Indicador visual de que se puede mantener presionado */
+.pe-slot {
+    position: relative;
+}
+
+.pe-slot::after {
+    content: '✋';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.pe-slot.filled:hover::after {
+    opacity: 0.6;
+}
+@keyframes popOut {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.7); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
