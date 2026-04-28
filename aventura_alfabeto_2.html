@@ -1549,7 +1549,7 @@
     </div>
     <div class="stars" id="global-stars"></div>
 
-    <button id="mainBackBtn" class="back-btn" onclick="showMainMenu()">🏠 Volver al Menú</button>
+    <button id="mainBackBtn" class="back-btn" onclick="window.location.href='index.html'">🏠 Volver al Menú</button>
 
     <!-- Main Menu -->
     <div id="main-menu" class="main-menu">
@@ -1777,6 +1777,9 @@
 
     <!-- Alfabeto Container -->
     <div id="alfabeto-app">
+    <div id="al_topMenu" style="position:fixed; top:18px; right:18px; z-index:2100;">
+        <button class="restart-btn" onclick="window.location.href='index.html'" style="padding:10px 16px; font-size:0.9rem;">🏠 Menú principal</button>
+    </div>
         
     <div class="bg-animation">
         <div class="bubble"></div>
@@ -1928,14 +1931,11 @@
                 document.getElementById('palabras-app').style.display = 'block';
                 pe_startGame();
             } else {
-                const isStandaloneAl = window.location.pathname.includes('aventura_alfabeto_2.html');
-                if (isStandaloneAl) {
-                    document.getElementById('alfabeto-app').style.display = 'block';
-                    const scr = document.getElementById('al_startScreen');
-                    if (scr) scr.classList.remove('hidden');
-                } else {
-                    window.location.href = 'aventura_alfabeto_2.html';
-                }
+                document.getElementById('alfabeto-app').style.display = 'block';
+                // stop startScreen from blocking
+                const scr = document.getElementById('al_startScreen');
+                if(scr) scr.classList.remove('hidden');
+                try { if(al_audioCtx) al_audioCtx.resume(); } catch(e){}
             }
         }
         
@@ -3530,6 +3530,19 @@
         }
 
         al_createStars();
+
+        window.addEventListener('load', () => {
+            showMainMenu();
+            openGame('alfabeto');
+            const back = document.getElementById('mainBackBtn');
+            if (back) {
+                back.style.display = 'block';
+                back.textContent = '🏠 Volver a Juegos Unidos';
+                back.onclick = () => { window.location.href = 'index.html'; };
+            }
+            const startBtn = document.getElementById('al_startBtn');
+            if (startBtn) { startBtn.disabled = false; startBtn.style.pointerEvents = 'auto'; startBtn.style.opacity = '1'; }
+        });
     
         
     </script>
