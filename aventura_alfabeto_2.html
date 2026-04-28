@@ -1998,16 +1998,34 @@
         al_createStars();
 
         window.addEventListener('load', () => {
-            showMainMenu();
-            openGame('alfabeto');
+            // Standalone mode: only Alfabeto screen should be active
+            const hide = ['main-menu', 'ahorcado-app', 'lluvia-app', 'palabras-app'];
+            hide.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = 'none';
+            });
+
+            const alApp = document.getElementById('alfabeto-app');
+            if (alApp) alApp.style.display = 'block';
+
             const back = document.getElementById('mainBackBtn');
             if (back) {
                 back.style.display = 'block';
                 back.textContent = '🏠 Volver a Juegos Unidos';
                 back.onclick = () => { window.location.href = 'index.html'; };
             }
+
+            const startScreen = document.getElementById('al_startScreen');
+            const gameContainer = document.getElementById('al_gameContainer');
+            if (startScreen) startScreen.classList.remove('hidden');
+            if (gameContainer) gameContainer.style.display = 'none';
+
             const startBtn = document.getElementById('al_startBtn');
-            if (startBtn) { startBtn.disabled = false; startBtn.style.pointerEvents = 'auto'; startBtn.style.opacity = '1'; }
+            if (startBtn) {
+                startBtn.disabled = false;
+                startBtn.style.pointerEvents = 'auto';
+                startBtn.style.opacity = '1';
+            }
         });
     
         
