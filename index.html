@@ -1168,56 +1168,56 @@
             document.getElementById('ll_gameOver').classList.add('show');
             gameCore.saveGame();
         }
+// ==================== PALABRAS ESCONDIDAS JS ====================
+function pe_getWordsFromAhorcado() {
+    const lang = gameCore.settings.language || 'es';
+    const pool = [];
+    Object.keys(ah_WORDS).forEach((category) => {
+        const entries = (ah_WORDS[category] && ah_WORDS[category][lang]) || [];
+        entries.forEach((entry) => {
+            const clean = String(entry.word || '').toUpperCase();
+            if (!clean) return;
+            pool.push({ w: clean.replace(/\s/g, ''), e: entry.emoji || '🔤' });
+        });
+    });
+    return pool;
+}
 
-        // ==================== PALABRAS ESCONDIDAS JS ====================
-        function pe_getWordsFromAhorcado() {
-            const lang = gameCore.settings.language || 'es';
-            const pool = [];
-            Object.keys(ah_WORDS).forEach((category) => {
-                const entries = (ah_WORDS[category] && ah_WORDS[category][lang]) || [];
-                entries.forEach((entry) => {
-                    const clean = String(entry.word || '').toUpperCase();
-                    if (!clean) return;
-                    pool.push({ w: clean.replace(/\s/g, ''), e: entry.emoji || '🔤' });
-                });
-            });
-            return pool;
-        }
-        let pe_state = { currentWord: '', letters: [], slots: [] };
-        
-        function pe_restartFromLevelOne() {
-            gameCore.player.level = 1;
-            gameCore.saveGame();
-            pe_startGame();
-        }
+let pe_state = { currentWord: '', letters: [], slots: [] };
 
-        function pe_startGame() {
-            gameCore.player.level = Math.max(1, gameCore.player.level);
-            pe_state = { currentWord: '', letters: [], slots: [] };
-            pe_updatePrizes();
-            pe_renderCollection();
-            gc_refreshHeaderLabels();
-            pe_nextWord();
-        }
-        
-        function pe_nextWord() {
-            document.getElementById('pe_winOverlay').classList.remove('show');
-            document.getElementById('pe_prizeMsg').style.display = 'none';
-            const sourceAll = pe_getWordsFromAhorcado();
-            const allowed = sourceAll.filter((obj) => gameCore.canUseWord(obj.w));
-            const source = allowed.length ? allowed : sourceAll;
-            let wordObj = source[Math.floor(Math.random() * source.length)];
-            pe_state.currentWord = wordObj.w;
-            document.getElementById('pe_hint').textContent = wordObj.e;
-            if(window.ah_speakWord) ah_speakWord(wordObj.w, 'es');
-            
-            pe_state.slots = new Array(wordObj.w.length).fill('');
-            pe_state.letters = wordObj.w.split('').sort(() => Math.random() - 0.5);
-            
-            pe_render();
-        }
-        
-     function pe_render() {
+function pe_restartFromLevelOne() {
+    gameCore.player.level = 1;
+    gameCore.saveGame();
+    pe_startGame();
+}
+
+function pe_startGame() {
+    gameCore.player.level = Math.max(1, gameCore.player.level);
+    pe_state = { currentWord: '', letters: [], slots: [] };
+    pe_updatePrizes();
+    pe_renderCollection();
+    gc_refreshHeaderLabels();
+    pe_nextWord();
+}
+
+function pe_nextWord() {
+    document.getElementById('pe_winOverlay').classList.remove('show');
+    document.getElementById('pe_prizeMsg').style.display = 'none';
+    const sourceAll = pe_getWordsFromAhorcado();
+    const allowed = sourceAll.filter((obj) => gameCore.canUseWord(obj.w));
+    const source = allowed.length ? allowed : sourceAll;
+    let wordObj = source[Math.floor(Math.random() * source.length)];
+    pe_state.currentWord = wordObj.w;
+    document.getElementById('pe_hint').textContent = wordObj.e;
+    if(window.ah_speakWord) ah_speakWord(wordObj.w, 'es');
+    
+    pe_state.slots = new Array(wordObj.w.length).fill('');
+    pe_state.letters = wordObj.w.split('').sort(() => Math.random() - 0.5);
+    
+    pe_render();
+}
+
+function pe_render() {
     let slotsDiv = document.getElementById('pe_wordSlots');
     slotsDiv.innerHTML = '';
     pe_state.slots.forEach((val, i) => {
@@ -1263,7 +1263,6 @@
         btn.textContent = val;
         if(val !== null) {
             btn.onclick = () => pe_letterClick(i);
-            // Animación al presionar
             btn.onpointerdown = () => btn.style.transform = 'scale(0.9)';
             btn.onpointerup = () => btn.style.transform = '';
             btn.onpointerleave = () => btn.style.transform = '';
@@ -1275,18 +1274,16 @@
     document.getElementById('pe_level').textContent = gameCore.player.level;
 }
 
-// NUEVA FUNCIÓN: Devolver letra del slot a las letras disponibles
+// Función para devolver letra del slot a las letras disponibles
 function pe_returnLetterToLetters(slotIndex) {
     let letter = pe_state.slots[slotIndex];
     if (!letter) return;
     
-    // Buscar la primera posición vacía en letters
     let emptyIndex = pe_state.letters.indexOf(null);
     if (emptyIndex !== -1) {
         pe_state.letters[emptyIndex] = letter;
         pe_state.slots[slotIndex] = '';
         
-        // Efecto visual
         const slotEl = document.querySelectorAll('#pe_wordSlots .pe-slot')[slotIndex];
         if (slotEl) {
             slotEl.style.animation = 'popOut 0.2s ease-out';
@@ -1298,14 +1295,29 @@ function pe_returnLetterToLetters(slotIndex) {
         if(window.ah_playSound) ah_playSound('wrong');
         pe_render();
         
-        // Limpiar errores visuales si los había
         document.querySelectorAll('.pe-slot.error').forEach(el => {
             el.classList.remove('error');
         });
     }
 }
 
-// Mejorar pe_letterClick para mejor feedback visual
+function pe_playHardError() {
+    try {
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        const ctx = new Ctx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(220, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.35);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.35);
+    } catch(e) {}
+}
+
 function pe_letterClick(idx) {
     let val = pe_state.letters[idx];
     let emptyIdx = pe_state.slots.indexOf('');
@@ -1313,7 +1325,6 @@ function pe_letterClick(idx) {
         pe_state.slots[emptyIdx] = val;
         pe_state.letters[idx] = null;
         
-        // Efecto visual de colocación
         const slotEl = document.querySelectorAll('#pe_wordSlots .pe-slot')[emptyIdx];
         if (slotEl) {
             slotEl.style.animation = 'popIn 0.2s ease-out';
@@ -1323,8 +1334,6 @@ function pe_letterClick(idx) {
         const expected = pe_state.currentWord[emptyIdx];
         if (expected !== val) {
             pe_playHardError();
-            
-            // Marcar error visual
             if (slotEl) slotEl.classList.add('error');
             
             const msg = document.getElementById('pe_prizeMsg');
@@ -1333,10 +1342,8 @@ function pe_letterClick(idx) {
             
             pe_render();
             
-            // Mantener el error visible pero permitir corrección
             setTimeout(() => {
                 msg.style.display = 'none';
-                // No limpiar el error automáticamente - el usuario debe corregirlo
             }, 900);
         } else {
             if(window.ah_playSound) ah_playSound('correct');
@@ -1346,7 +1353,6 @@ function pe_letterClick(idx) {
     }
 }
 
-// Mejorar pe_slotClick (click normal para mover letra)
 function pe_slotClick(idx) {
     let val = pe_state.slots[idx];
     if(val) {
@@ -1355,7 +1361,6 @@ function pe_slotClick(idx) {
             pe_state.letters[emptyIdx] = val;
             pe_state.slots[idx] = '';
             
-            // Efecto visual
             const slotEl = document.querySelectorAll('#pe_wordSlots .pe-slot')[idx];
             if (slotEl) {
                 slotEl.style.animation = 'popOut 0.2s ease-out';
@@ -1365,144 +1370,74 @@ function pe_slotClick(idx) {
             if(window.ah_playSound) ah_playSound('wrong');
             pe_render();
             
-            // Limpiar error visual de este slot
             if (slotEl) slotEl.classList.remove('error');
         }
     }
 }
+
+function pe_checkWin() {
+    if(!pe_state.slots.includes('')) {
+        let formed = pe_state.slots.join('');
+        if(formed === pe_state.currentWord) {
+            gameCore.addScore(40 + (gameCore.player.level * 5));
+            gameCore.registerWordResult(pe_state.currentWord, true);
+            gameCore.player.level++;
+            if(window.ah_playSound) ah_playSound('win');
+            if(window.al_createConfetti) al_createConfetti();
             
-            let lettersDiv = document.getElementById('pe_lettersArea');
-            lettersDiv.innerHTML = '';
-            pe_state.letters.forEach((val, i) => {
-                let btn = document.createElement('button');
-                btn.className = 'pe-letter-btn' + (val === null ? ' hidden' : '');
-                btn.textContent = val;
-                if(val !== null) btn.onclick = () => pe_letterClick(i);
-                lettersDiv.appendChild(btn);
-            });
-            
-            document.getElementById('pe_score').textContent = gameCore.player.score;
-            document.getElementById('pe_level').textContent = gameCore.player.level;
+            pe_updatePrizes();
+            pe_renderCollection();
+            setTimeout(() => {
+                document.getElementById('pe_winTitle').textContent = t('correct');
+                document.getElementById('pe_prizeMsg').style.display = 'none';
+                document.getElementById('pe_winOverlay').classList.add('show');
+            }, 500);
+        } else {
+            gameCore.registerWordResult(pe_state.currentWord, false);
+            pe_playHardError();
+            const msg = document.getElementById('pe_prizeMsg');
+            msg.style.display = 'block';
+            msg.textContent = '❌ ' + t('wrong');
+            document.getElementById('pe_hint').textContent = '😢';
+            const slotEls = document.querySelectorAll('#pe_wordSlots .pe-slot');
+            slotEls.forEach((el) => { el.classList.add('error'); el.textContent = '❌'; });
+            document.getElementById('pe_wordSlots').style.animation = 'wrongAnim 0.5s';
+            setTimeout(() => {
+                document.getElementById('pe_wordSlots').style.animation = '';
+                pe_state.letters = pe_state.currentWord.split('').sort(() => Math.random() - 0.5);
+                pe_state.slots = new Array(pe_state.currentWord.length).fill('');
+                pe_render();
+                msg.style.display = 'none';
+            }, 700);
         }
-        
-        function pe_playHardError() {
-            try {
-                const Ctx = window.AudioContext || window.webkitAudioContext;
-                if (!Ctx) return;
-                const ctx = new Ctx();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(220, ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.35);
-                gain.gain.setValueAtTime(0.25, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + 0.35);
-            } catch(e) {}
-        }
+    }
+}
 
-        function pe_letterClick(idx) {
-            let val = pe_state.letters[idx];
-            let emptyIdx = pe_state.slots.indexOf('');
-            if(emptyIdx !== -1) {
-                pe_state.slots[emptyIdx] = val;
-                pe_state.letters[idx] = null;
-                const expected = pe_state.currentWord[emptyIdx];
-                if (expected !== val) {
-                    pe_playHardError();
-                    const msg = document.getElementById('pe_prizeMsg');
-                    msg.style.display = 'block';
-                    msg.textContent = '❌ ' + t('wrong');
-                    pe_render();
-                    const slotEls = document.querySelectorAll('#pe_wordSlots .pe-slot');
-                    if (slotEls[emptyIdx]) slotEls[emptyIdx].classList.add('error');
-                    setTimeout(() => { msg.style.display = 'none'; }, 900);
-                } else {
-                    if(window.ah_playSound) ah_playSound('correct');
-                    pe_render();
-                }
-                pe_checkWin();
-            }
-        }
-        
-        function pe_slotClick(idx) {
-            let val = pe_state.slots[idx];
-            if(val) {
-                let emptyIdx = pe_state.letters.indexOf(null);
-                if(emptyIdx !== -1) {
-                    pe_state.letters[emptyIdx] = val;
-                    pe_state.slots[idx] = '';
-                    if(window.ah_playSound) ah_playSound('wrong');
-                    pe_render();
-                }
-            }
-        }
-        
-        function pe_checkWin() {
-            if(!pe_state.slots.includes('')) {
-                let formed = pe_state.slots.join('');
-                if(formed === pe_state.currentWord) {
-                    gameCore.addScore(40 + (gameCore.player.level * 5));
-                    gameCore.registerWordResult(pe_state.currentWord, true);
-                    gameCore.player.level++;
-                    if(window.ah_playSound) ah_playSound('win');
-                    if(window.al_createConfetti) al_createConfetti();
-                    
-                    pe_updatePrizes();
-                    pe_renderCollection();
-                    setTimeout(() => {
-                        document.getElementById('pe_winTitle').textContent = t('correct');
-                        document.getElementById('pe_prizeMsg').style.display = 'none';
-                        document.getElementById('pe_winOverlay').classList.add('show');
-                    }, 500);
-                } else {
-                    gameCore.registerWordResult(pe_state.currentWord, false);
-                    pe_playHardError();
-                    const msg = document.getElementById('pe_prizeMsg');
-                    msg.style.display = 'block';
-                    msg.textContent = '❌ ' + t('wrong');
-                    document.getElementById('pe_hint').textContent = '😢';
-                    const slotEls = document.querySelectorAll('#pe_wordSlots .pe-slot');
-                    slotEls.forEach((el) => { el.classList.add('error'); el.textContent = '❌'; });
-                    document.getElementById('pe_wordSlots').style.animation = 'wrongAnim 0.5s';
-                    setTimeout(() => {
-                        document.getElementById('pe_wordSlots').style.animation = '';
-                        pe_state.letters = pe_state.currentWord.split('').sort(() => Math.random() - 0.5);
-                        pe_state.slots = new Array(pe_state.currentWord.length).fill('');
-                        pe_render();
-                        msg.style.display = 'none';
-                    }, 700);
-                }
-            }
-        }
-        
-        function pe_updatePrizes() {
-            let list = document.getElementById('pe_prizeList');
-            list.innerHTML = '';
-            gameCore.player.rewards.forEach((rid) => {
-                const reward = gameCore.rewardCatalog.find((r) => r.id === rid);
-                if (!reward) return;
-                let d = document.createElement('div');
-                d.className = 'pe-prize-item';
-                d.innerHTML = reward.icono + '<span>' + reward.nombre + '</span>';
-                list.appendChild(d);
-            });
-        }
+function pe_updatePrizes() {
+    let list = document.getElementById('pe_prizeList');
+    list.innerHTML = '';
+    gameCore.player.rewards.forEach((rid) => {
+        const reward = gameCore.rewardCatalog.find((r) => r.id === rid);
+        if (!reward) return;
+        let d = document.createElement('div');
+        d.className = 'pe-prize-item';
+        d.innerHTML = reward.icono + '<span>' + reward.nombre + '</span>';
+        list.appendChild(d);
+    });
+}
 
-        function pe_renderCollection() {
-            document.getElementById('pe_collectionTitle').textContent = t('collection_title');
-            const grid = document.getElementById('pe_collectionGrid');
-            grid.innerHTML = '';
-            gameCore.rewardCatalog.forEach((reward) => {
-                const unlocked = gameCore.player.rewards.includes(reward.id);
-                const el = document.createElement('div');
-                el.className = 'collection-item' + (unlocked ? '' : ' locked');
-                el.innerHTML = reward.icono + '<span class="name">' + reward.nombre + '</span>';
-                grid.appendChild(el);
-            });
-        }
-
+function pe_renderCollection() {
+    document.getElementById('pe_collectionTitle').textContent = t('collection_title');
+    const grid = document.getElementById('pe_collectionGrid');
+    grid.innerHTML = '';
+    gameCore.rewardCatalog.forEach((reward) => {
+        const unlocked = gameCore.player.rewards.includes(reward.id);
+        const el = document.createElement('div');
+        el.className = 'collection-item' + (unlocked ? '' : ' locked');
+        el.innerHTML = reward.icono + '<span class="name">' + reward.nombre + '</span>';
+        grid.appendChild(el);
+    });
+}
 
         // --- ALFABETO JS ---
         
