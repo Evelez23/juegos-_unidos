@@ -1893,43 +1893,66 @@
     <script src="./i18n.js"></script>
     <script>
         // --- GLOBAL MENU LOGIC ---
+       <script>
+        // ==================== FUNCIONES GLOBALES DEL MENÚ ====================
         function showMainMenu() {
-            document.getElementById('main-menu').style.display = 'flex';
-            document.getElementById('ahorcado-app').style.display = 'none';
-            document.getElementById('alfabeto-app').style.display = 'none';
-            document.getElementById('lluvia-app').style.display = 'none';
-            document.getElementById('palabras-app').style.display = 'none';
-            document.getElementById('mainBackBtn').style.display = 'none';
+            const mainMenu = document.getElementById('main-menu');
+            const ahorcadoApp = document.getElementById('ahorcado-app');
+            const alfabetoApp = document.getElementById('alfabeto-app');
+            const lluviaApp = document.getElementById('lluvia-app');
+            const palabrasApp = document.getElementById('palabras-app');
+            const backBtn = document.getElementById('mainBackBtn');
             
-            // Stop audio if exists
-            try { if(ah_audioCtx) ah_audioCtx.suspend(); } catch(e){}
-            try { if(al_audioCtx) al_audioCtx.suspend(); } catch(e){}
+            if (mainMenu) mainMenu.style.display = 'flex';
+            if (ahorcadoApp) ahorcadoApp.style.display = 'none';
+            if (alfabetoApp) alfabetoApp.style.display = 'none';
+            if (lluviaApp) lluviaApp.style.display = 'none';
+            if (palabrasApp) palabrasApp.style.display = 'none';
+            if (backBtn) backBtn.style.display = 'none';
+            
+            // Detener audios
+            try { if(window.ah_audioCtx) window.ah_audioCtx.suspend(); } catch(e){}
+            try { if(window.al_audioCtx) window.al_audioCtx.suspend(); } catch(e){}
             try { window.speechSynthesis.cancel(); } catch(e){}
         }
 
         function openGame(game) {
-            document.getElementById('main-menu').style.display = 'none';
-            document.getElementById('mainBackBtn').style.display = 'block';
+            const mainMenu = document.getElementById('main-menu');
+            const backBtn = document.getElementById('mainBackBtn');
+            
+            if (mainMenu) mainMenu.style.display = 'none';
+            if (backBtn) backBtn.style.display = 'block';
             
             if (game === 'ahorcado') {
-                document.getElementById('ahorcado-app').style.display = 'block';
-                // start ahorcado
-                try { if(ah_audioCtx) ah_audioCtx.resume(); } catch(e){}
-                ah_resetHangman();
-                ah_nextWord();
-            } else if (game === 'lluvia') {
-                document.getElementById('lluvia-app').style.display = 'block';
-                ll_startGame();
-            } else if (game === 'palabras') {
-                document.getElementById('palabras-app').style.display = 'block';
-                pe_startGame();
-            } else {
-                window.location.href = 'aventura_alfabeto_2.html';
+                const ahorcadoApp = document.getElementById('ahorcado-app');
+                if (ahorcadoApp) ahorcadoApp.style.display = 'block';
+                try { if(window.ah_audioCtx) window.ah_audioCtx.resume(); } catch(e){}
+                if (typeof ah_resetHangman === 'function') ah_resetHangman();
+                if (typeof ah_nextWord === 'function') ah_nextWord();
+            } 
+            else if (game === 'lluvia') {
+                const lluviaApp = document.getElementById('lluvia-app');
+                if (lluviaApp) lluviaApp.style.display = 'block';
+                if (typeof ll_startGame === 'function') ll_startGame();
+            } 
+            else if (game === 'palabras') {
+                const palabrasApp = document.getElementById('palabras-app');
+                if (palabrasApp) palabrasApp.style.display = 'block';
+                if (typeof pe_startGame === 'function') pe_startGame();
+            } 
+            else if (game === 'alfabeto') {
+                const alfabetoApp = document.getElementById('alfabeto-app');
+                if (alfabetoApp) alfabetoApp.style.display = 'block';
+                const startScreen = document.getElementById('al_startScreen');
+                if (startScreen) startScreen.classList.remove('hidden');
+                try { if(window.al_audioCtx) window.al_audioCtx.resume(); } catch(e){}
             }
         }
         
+        // Crear estrellas de fondo
         function globalCreateStars() {
             const container = document.getElementById('global-stars');
+            if (!container) return;
             for (let i = 0; i < 50; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
@@ -1940,14 +1963,18 @@
                 container.appendChild(star);
             }
         }
-        globalCreateStars();
-        gc_refreshHeaderLabels && gc_refreshHeaderLabels();
         
-        // Disable original createStars inside games individually so they don't spawn multiple times
-        function ah_createStars() {}
-        function al_createStars() {}
-
-        // --- AHORCADO JS ---
+        globalCreateStars();
+        
+        // Inicializar idioma si existe la función
+        if (typeof gc_refreshHeaderLabels === 'function') {
+            gc_refreshHeaderLabels();
+        }
+        
+        // Deshabilitar funciones duplicadas de estrellas
+        window.ah_createStars = function() {};
+        window.al_createStars = function() {};
+</script>
         
         // ==================== WORD DATABASE ====================
         const ah_WORDS = {
