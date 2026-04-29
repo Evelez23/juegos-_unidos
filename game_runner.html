@@ -419,16 +419,18 @@
         }
         globalCreateStars();
 
-        const requestedGame = new URLSearchParams(window.location.search).get('game');
-        if (requestedGame) {
-            showMainMenu();
-            openGame(requestedGame);
-            const back = document.getElementById('mainBackBtn');
-            if (back) {
-                back.style.display = 'block';
-                back.onclick = () => { window.location.href = 'index.html'; };
+        window.addEventListener('load', () => {
+            const requestedGame = new URLSearchParams(window.location.search).get('game');
+            if (requestedGame) {
+                showMainMenu();
+                openGame(requestedGame);
+                const back = document.getElementById('mainBackBtn');
+                if (back) {
+                    back.style.display = 'block';
+                    back.onclick = () => { window.location.href = 'index.html'; };
+                }
             }
-        }
+        });
         gc_refreshHeaderLabels && gc_refreshHeaderLabels();
         
         // Disable original createStars inside games individually so they don't spawn multiple times
