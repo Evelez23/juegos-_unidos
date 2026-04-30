@@ -3,6 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Juegos Aurora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+    </div>
+    <div class="stars" id="global-stars"></div>
+
+    <button id="mainBackBtn" class="back-btn" onclick="window.location.href='index.html'">🏠 Volver al Menú</button>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="main-menu">
+        <h1 class="menu-title">Juegos Aurora<br><span style="font-size: 1.5rem; color: #a0a0a0;">Bilingual School</span></h1>
+        
+        <div class="games-grid">
+            <div class="game-card" onclick="openGame('ahorcado')">
+                <span class="emoji">🎪</span>
+                <h3>Ahorcado Mágico</h3>
+                <p>Descubre las palabras ocultas antes de que se dibuje el muñeco.</p>
+            </div>
+            
+            <div class="game-card" onclick="openGame('alfabeto')">
+                <span class="emoji">🌈</span>
+                <h3>Aventura del Alfabeto</h3>
+                <p>Encuentra y memoriza las letras con ayuda del unicornio mágico.</p>
+            </div>
+        
+            <div class="game-card" onclick="openGame('lluvia')">
+                <span class="emoji">☔</span>
+                <h3>Lluvia de Letras</h3>
+                <p>Atrapa las letras correctas que caen del cielo. ¡Cuidado con las bombas!</p>
+            </div>
+            
+            <div class="game-card" onclick="openGame('palabras')">
+                <span class="emoji">🧩</span>
+                <h3>Palabras Escondidas</h3>
+                <p>Ordena las letras para formar la palabra y colecciona premios mágicos.</p>
+            </div>
+
+        </div>
+    </div>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🌈 Aventura del Alfabeto - Aurora Bilingual School</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
