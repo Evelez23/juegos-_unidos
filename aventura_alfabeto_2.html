@@ -22,10 +22,7 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        body
-        
-         <button id="mainBackBtn" class="back-btn" onclick="window.location.href='index.html'">🏠 Volver al Menú</button>
-{
+        body {
             font-family: 'Nunito', sans-serif;
             background: var(--bg);
             min-height: 100vh;
@@ -1192,7 +1189,10 @@
                 // Show level complete overlay
                 document.getElementById('gameOverTitle').textContent = '¡Nivel ' + (gameState.level - 1) + ' Completado! 🎉';
                 const btn = document.querySelector('#gameOver .restart-btn');
-                if (btn) btn.textContent = 'Siguiente Nivel 🚀';
+                if (btn) {
+                    btn.textContent = 'Siguiente Nivel 🚀';
+                    btn.setAttribute('onclick', 'nextLevel()');
+                }
 
                 document.getElementById('finalScore').textContent = gameState.score;
                 document.getElementById('finalStreak').textContent = gameState.bestStreak;
@@ -1469,14 +1469,42 @@
             else titleEl.textContent = '¡SIGUE PRACTICANDO! 💪';
 
             createConfetti();
+            const endBtn = document.querySelector('#gameOver .restart-btn');
+            if (endBtn) {
+                endBtn.textContent = '¡Jugar de Nuevo! 🎮';
+                endBtn.setAttribute('onclick', 'restartGame()');
+            }
             document.getElementById('gameOver').classList.add('show');
         }
 
         function restartGame() {
             document.getElementById('gameOver').classList.remove('show');
             const btn = document.querySelector('#gameOver .restart-btn');
-            if (btn) btn.textContent = '¡Jugar de Nuevo! 🎮';
+            if (btn) {
+                btn.textContent = '¡Jugar de Nuevo! 🎮';
+                btn.setAttribute('onclick', 'restartGame()');
+            }
+            document.getElementById('gameOverTitle').textContent = '¡Excelente!';
             resetGame();
+            nextRound();
+        }
+
+        function nextLevel() {
+            document.getElementById('gameOver').classList.remove('show');
+            const btn = document.querySelector('#gameOver .restart-btn');
+            if (btn) {
+                btn.textContent = '¡Jugar de Nuevo! 🎮';
+                btn.setAttribute('onclick', 'restartGame()');
+            }
+            document.getElementById('gameOverTitle').textContent = '¡Excelente!';
+            // Don't reset score/level! Just continue
+            gameState.streak = 0;
+            gameState.lives = 3;
+            gameState.round = 0;
+            gameState.correctAnswers = 0;
+            gameState.isPlaying = true;
+            gameState.bestStreak = 0;
+            updateUI();
             nextRound();
         }
 
