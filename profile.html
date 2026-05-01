@@ -1,0 +1,321 @@
+<!-- profile.html - Pantalla de selección/creación de perfil -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Juegos Aurora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B9D;
+            --secondary: #C44569;
+            --accent1: #FFC312;
+            --accent2: #12CBC4;
+            --accent3: #B53471;
+            --accent4: #6C5CE7;
+            --accent5: #00D2D3;
+            --accent6: #FF9F43;
+            --bg: #1a1a2e;
+            --card: #16213e;
+            --text: #f1f2f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .bubble:nth-child(1) { width: 80px; height: 80px; background: #FF6B9D; left: 10%; top: 20%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 120px; height: 120px; background: #12CBC4; left: 70%; top: 60%; animation-delay: 2s; }
+        .bubble:nth-child(3) { width: 60px; height: 60px; background: #FFC312; left: 40%; top: 80%; animation-delay: 4s; }
+        .bubble:nth-child(4) { width: 100px; height: 100px; background: #6C5CE7; left: 80%; top: 10%; animation-delay: 1s; }
+        .bubble:nth-child(5) { width: 70px; height: 70px; background: #00D2D3; left: 20%; top: 70%; animation-delay: 3s; }
+        .bubble:nth-child(6) { width: 90px; height: 90px; background: #FF9F43; left: 55%; top: 30%; animation-delay: 5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(20px) rotate(240deg); }
+        }
+
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px; height: 3px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .profile-container {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .profile-card {
+            background: linear-gradient(135deg, var(--card), #1e2a4a);
+            border-radius: 40px;
+            padding: 40px;
+            text-align: center;
+            border: 2px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            width: 100%;
+        }
+
+        .profile-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent1), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+
+        .avatar-selector {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .avatar-option {
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            padding: 15px;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .avatar-option.selected {
+            background: linear-gradient(135deg, var(--primary), var(--accent3));
+            box-shadow: 0 0 30px rgba(255,107,157,0.5);
+            transform: scale(1.05);
+        }
+
+        .avatar-option .avatar-icon {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .avatar-option .avatar-label {
+            font-weight: bold;
+            color: var(--text);
+        }
+
+        .name-input {
+            margin-bottom: 30px;
+        }
+
+        .name-input label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--accent1);
+            font-weight: bold;
+        }
+
+        .name-input input {
+            width: 100%;
+            padding: 15px 20px;
+            border-radius: 50px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+
+        .name-input input:focus {
+            outline: none;
+            border-color: var(--accent2);
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent2), var(--accent5));
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(18,203,196,0.4);
+        }
+
+        .dashboard-link {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .dashboard-link a {
+            color: var(--accent1);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .dashboard-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            color: #e74c3c;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+    </div>
+    <div class="stars" id="stars"></div>
+
+    <div class="profile-container">
+        <div class="profile-card">
+            <h1 class="profile-title">✨ ¡Crea tu Aventurero! ✨</h1>
+            
+            <div class="avatar-selector">
+                <div class="avatar-option" data-gender="boy" onclick="selectGender('boy')">
+                    <div class="avatar-icon">👦</div>
+                    <div class="avatar-label">Niño</div>
+                </div>
+                <div class="avatar-option" data-gender="girl" onclick="selectGender('girl')">
+                    <div class="avatar-icon">👧</div>
+                    <div class="avatar-label">Niña</div>
+                </div>
+            </div>
+
+            <div class="name-input">
+                <label>🌟 ¿Cómo te llamas?</label>
+                <input type="text" id="playerName" placeholder="Escribe tu nombre..." maxlength="20">
+            </div>
+
+            <button class="start-btn" onclick="saveProfile()">🎮 ¡Comenzar Aventura! 🎮</button>
+            
+            <div class="dashboard-link">
+                <a href="#" onclick="goToDashboard()">📊 Ver mi progreso</a>
+            </div>
+            <div id="errorMsg" class="error-msg"></div>
+        </div>
+    </div>
+
+    <script src="./gameCore.js"></script>
+    <script>
+        function createStars() {
+            const container = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+        }
+        createStars();
+
+        let selectedGender = 'boy';
+
+        function selectGender(gender) {
+            selectedGender = gender;
+            document.querySelectorAll('.avatar-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            document.querySelector(`[data-gender="${gender}"]`).classList.add('selected');
+        }
+
+        function saveProfile() {
+            const name = document.getElementById('playerName').value.trim();
+            if (!name) {
+                document.getElementById('errorMsg').textContent = '¡Escribe tu nombre para continuar!';
+                return;
+            }
+            
+            const profile = {
+                name: name,
+                gender: selectedGender,
+                avatar: selectedGender === 'boy' ? '👦' : '👧',
+                createdAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('auroraPlayerProfile', JSON.stringify(profile));
+            
+            // También actualizar en gameCore si existe
+            if (window.gameCore && window.gameCore.player) {
+                window.gameCore.player.name = name;
+                window.gameCore.player.gender = selectedGender;
+                window.gameCore.saveGame();
+            }
+            
+            window.location.href = 'index.html';
+        }
+
+        function goToDashboard() {
+            const profile = localStorage.getItem('auroraPlayerProfile');
+            if (profile) {
+                window.location.href = 'dashboard.html';
+            } else {
+                document.getElementById('errorMsg').textContent = 'Primero crea tu perfil';
+            }
+        }
+
+        // Cargar perfil existente si hay
+        const existingProfile = localStorage.getItem('auroraPlayerProfile');
+        if (existingProfile) {
+            const profile = JSON.parse(existingProfile);
+            document.getElementById('playerName').value = profile.name;
+            selectGender(profile.gender);
+        }
+    </script>
+</body>
+</html>
