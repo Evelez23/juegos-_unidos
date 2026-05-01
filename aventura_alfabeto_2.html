@@ -725,8 +725,10 @@
         }
     </style>
 <base target="_blank">
+    <script src="./gameCore.js"></script>
 </head>
 <body>
+    <a href="./index.html" style="position:fixed; top:20px; left:20px; z-index:2000; background:linear-gradient(135deg, #6C5CE7, #B53471); color:white; border:none; border-radius:50px; padding:10px 20px; font-family:'Fredoka One',cursive; text-decoration:none; box-shadow:0 5px 15px rgba(0,0,0,0.3);">🗺️ Mapa</a>
     <div class="bg-animation">
         <div class="bubble"></div>
         <div class="bubble"></div>
@@ -1510,5 +1512,21 @@
 
         createStars();
     </script>
+
+<script>
+// adv_xp_hook_applied
+window.addEventListener('load', () => {
+
+    const orig_nextRound = window.nextRound;
+    if(orig_nextRound) {
+        window.nextRound = function() {
+            let oldLevel = gameState.level;
+            orig_nextRound();
+            if(gameState.level > oldLevel) window.gameCore.gainXP(100);
+        };
+    }
+
+});
+</script>
 </body>
 </html>

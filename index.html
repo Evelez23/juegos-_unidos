@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Juegos Aurora | Dashboard</title>
+  <title>Mundo Mágico de Aurora</title>
   <link rel="icon" href="data:," />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
+  <script src="./gameCore.js"></script>
 </head>
 <body>
   <div class="bg-animation">
@@ -15,22 +16,62 @@
   </div>
   <div class="stars" id="global-stars"></div>
 
-  <div id="main-menu" class="main-menu">
-    <h1 class="menu-title">Juegos Aurora<br><span style="font-size:1.3rem;color:#a0a0a0;">Dashboard</span></h1>
-    <div class="games-grid">
-      <a class="game-card" href="./ahorcado.html" style="text-decoration:none;color:inherit;">
-        <span class="emoji">🎪</span><h3>Ahorcado Mágico</h3><p>Juego individual</p>
-      </a>
-      <a class="game-card" href="./aventura_alfabeto_2.html" style="text-decoration:none;color:inherit;">
-        <span class="emoji">🌈</span><h3>Aventura del Alfabeto</h3><p>Página individual</p>
-      </a>
-      <a class="game-card" href="./lluvia.html" style="text-decoration:none;color:inherit;">
-        <span class="emoji">☔</span><h3>Lluvia de Letras</h3><p>Juego individual</p>
-      </a>
-      <a class="game-card" href="./palabras.html" style="text-decoration:none;color:inherit;">
-        <span class="emoji">🧩</span><h3>Palabras Escondidas</h3><p>Juego individual</p>
-      </a>
-    </div>
+  <!-- Sistema de Aventura (Reemplaza al Main Menu) -->
+  <div id="adventure-system" class="adventure-system">
+      <div class="adv-header">
+          <div class="adv-profile">
+              <div class="adv-avatar" id="adv_avatar">🦸‍♂️</div>
+              <div class="adv-stats">
+                  <h2 id="adv_playerName">Aventurero</h2>
+                  <div class="adv-level">Nivel <span id="adv_playerLevel">1</span></div>
+              </div>
+          </div>
+          <div class="adv-progress">
+              <div class="adv-progress-text">Exp: <span id="adv_progressText">0 / 1000</span></div>
+              <div class="adv-progress-bar"><div class="adv-progress-fill" id="adv_progressFill" style="width: 0%"></div></div>
+          </div>
+          <button class="adv-inventory-btn" onclick="openInventory()">🎒 Inventario</button>
+      </div>
+
+      <h1 class="adv-title">El Mundo Mágico de Aurora</h1>
+
+      <div class="adv-map">
+          <!-- Zona 1: Bosque de Letras -->
+          <a class="adv-zone zone-unlocked" id="zone_alfabeto" href="./aventura_alfabeto_2.html" style="text-decoration:none;">
+              <div class="zone-icon">🌳</div>
+              <div class="zone-name">Bosque de Letras</div>
+          </a>
+
+          <!-- Zona 2: Tormenta de Lluvia -->
+          <a class="adv-zone zone-locked" id="zone_lluvia" href="#" onclick="checkLock(event, 'lluvia', './lluvia.html')" style="text-decoration:none;">
+              <div class="zone-icon">☔</div>
+              <div class="zone-name">Tormenta Veloz</div>
+              <div class="zone-lock" id="lock_lluvia">🔒 Nivel 2</div>
+          </a>
+
+          <!-- Zona 3: Ruinas de Palabras -->
+          <a class="adv-zone zone-locked" id="zone_palabras" href="#" onclick="checkLock(event, 'palabras', './palabras.html')" style="text-decoration:none;">
+              <div class="zone-icon">🧩</div>
+              <div class="zone-name">Ruinas Antiguas</div>
+              <div class="zone-lock" id="lock_palabras">🔒 Nivel 5</div>
+          </a>
+
+          <!-- Zona 4: Torre del Ahorcado -->
+          <a class="adv-zone zone-locked" id="zone_ahorcado" href="#" onclick="checkLock(event, 'ahorcado', './ahorcado.html')" style="text-decoration:none;">
+              <div class="zone-icon">🎪</div>
+              <div class="zone-name">Torre Mágica</div>
+              <div class="zone-lock" id="lock_ahorcado">🔒 Nivel 8</div>
+          </a>
+      </div>
+  </div>
+
+  <!-- Inventory Overlay -->
+  <div class="adv-inventory-overlay" id="adv_inventory" style="display: none;">
+      <div class="adv-inventory-content">
+          <button class="adv-close-btn" onclick="closeInventory()">✖</button>
+          <h2>Tu Inventario Mágico 🎒</h2>
+          <div class="adv-inventory-grid" id="adv_inventoryGrid"></div>
+      </div>
   </div>
 
   <script>
@@ -46,6 +87,82 @@
         container.appendChild(star);
       }
     })();
+
+    function updateUI() {
+        document.getElementById('adv_playerLevel').textContent = gameCore.player.level;
+        let nextXP = gameCore.player.level * 1000;
+        document.getElementById('adv_progressText').textContent = `${gameCore.player.xp} / ${nextXP}`;
+        document.getElementById('adv_progressFill').style.width = `${(gameCore.player.xp / nextXP) * 100}%`;
+
+        const zones = ['lluvia', 'palabras', 'ahorcado'];
+        zones.forEach(z => {
+            let zEl = document.getElementById(`zone_${z}`);
+            let lEl = document.getElementById(`lock_${z}`);
+            if (zEl && lEl) {
+                if (gameCore.player.unlockedZones.includes(z)) {
+                    zEl.className = 'adv-zone zone-unlocked';
+                    lEl.style.display = 'none';
+                } else {
+                    zEl.className = 'adv-zone zone-locked';
+                    lEl.style.display = 'block';
+                }
+            }
+        });
+    }
+
+    function checkLock(e, zone, url) {
+        if (!gameCore.player.unlockedZones.includes(zone)) {
+            e.preventDefault();
+            let zEl = document.getElementById(`zone_${zone}`);
+            zEl.style.transform = 'translateY(5px)';
+            setTimeout(() => zEl.style.transform = 'none', 100);
+            return false;
+        } else {
+            window.location.href = url;
+        }
+    }
+
+    function openInventory() {
+        document.getElementById('adv_inventory').style.display = 'flex';
+        let grid = document.getElementById('adv_inventoryGrid');
+        grid.innerHTML = '';
+        
+        if(gameCore.player.rewards.length === 0) {
+            grid.innerHTML = '<p style="color:#aaa; grid-column:1/-1;">Sube de nivel para desbloquear premios mágicos.</p>';
+        } else {
+            gameCore.player.rewards.forEach(rid => {
+                let item = gameCore.rewardCatalog.find(r => r.id === rid);
+                if(item) {
+                    let div = document.createElement('div');
+                    div.className = `inv-item ${item.rarity}`;
+                    div.innerHTML = `
+                        <div class="inv-icon">${item.icon}</div>
+                        <div class="inv-name">${item.name}</div>
+                        <div class="inv-desc">${item.desc}</div>
+                    `;
+                    grid.appendChild(div);
+                }
+            });
+        }
+    }
+
+    function closeInventory() {
+        document.getElementById('adv_inventory').style.display = 'none';
+    }
+
+    // Listeners for UI updates
+    document.addEventListener('adv_levelup', (e) => {
+        alert(`¡Felicidades! Eres Nivel ${e.detail.level}`);
+        updateUI();
+    });
+    
+    document.addEventListener('adv_reward', (e) => {
+        const reward = e.detail;
+        alert(`¡NUEVO PREMIO MAGICO!
+${reward.icon} ${reward.name} (${reward.rarity})`);
+    });
+
+    window.addEventListener('load', updateUI);
   </script>
 </body>
 </html>

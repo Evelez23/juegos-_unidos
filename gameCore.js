@@ -1,37 +1,28 @@
 (function (global) {
-  const STORAGE_KEY = 'juegosAuroraGameCoreV1';
+  const STORAGE_KEY = 'juegosAuroraAdventure';
 
   const rewardCatalog = [
-    { id: 'letters_streak_10', nombre: 'Racha de 10 letras', icono: '🔤', condicion: 'completar 10 letras sin fallar' },
-    { id: 'word_master_1', nombre: 'Primer constructor', icono: '🧩', condicion: 'completar una palabra completa' },
-    { id: 'rain_survivor_lvl3', nombre: 'Superviviente lluvia', icono: '☔', condicion: 'sobrevivir nivel 3 en juego de caída' },
-    { id: 'polyglot', nombre: 'Bilingüe curioso', icono: '🌍', condicion: 'jugar en español e inglés' }
+    { id: 'escudo_lluvia', name: 'Escudo de Lluvia', icon: '🛡️', rarity: 'raro', desc: '+1 Vida en Tormenta Veloz', type: 'buff_lives_lluvia' },
+    { id: 'lupa_magica', name: 'Lupa Reveladora', icon: '🔍', rarity: 'epico', desc: 'Bonus de puntos en Ruinas Antiguas', type: 'buff_score_palabras' },
+    { id: 'corazon_fenix', name: 'Corazón Fénix', icon: '❤️', rarity: 'legendario', desc: '+1 Intento extra permanente', type: 'buff_lives_global' },
+    { id: 'letras_pro', name: 'Maestro de Letras', icon: '👑', rarity: 'comun', desc: 'Insignia de dominio del bosque', type: 'badge' }
   ];
 
   const defaultState = {
     player: {
-      name: 'Peque Explorer',
-      score: 0,
-      lives: 3,
+      name: 'Aventurero',
+      xp: 0,
       level: 1,
-      rewards: []
+      lives: 3,
+      rewards: [],
+      unlockedZones: ['alfabeto']
     },
-    settings: {
-      language: 'es'
-    },
-    progress: {
-      letters: {},
-      words: {}
-    },
-    metrics: {
-      lettersWithoutFail: 0,
-      languagesUsed: ['es']
-    }
+    settings: { language: 'es' },
+    progress: { letters: {}, words: {} },
+    metrics: { gamesPlayed: 0 }
   };
 
-  function clone(v) {
-    return JSON.parse(JSON.stringify(v));
-  }
+  function clone(v) { return JSON.parse(JSON.stringify(v)); }
 
   const gameCore = {
     ...clone(defaultState),
@@ -63,90 +54,81 @@
       }
     },
 
-    addScore(points) {
-      const safe = Number(points) || 0;
-      this.player.score += safe;
+    gainXP(amount) {
+      let multiplier = this.hasRewardType('buff_score_palabras') ? 1.2 : 1;
+      this.player.xp += Math.floor(amount * multiplier);
+      this.checkLevelUp();
       this.saveGame();
     },
 
-    loseLife() {
-      this.player.lives = Math.max(0, this.player.lives - 1);
-      this.metrics.lettersWithoutFail = 0;
-      this.saveGame();
-      return this.player.lives;
-    },
-
-    gainLife() {
-      this.player.lives = Math.min(5, this.player.lives + 1);
-      this.saveGame();
-      return this.player.lives;
-    },
-
-    setLanguage(lang) {
-      if (!['es', 'en'].includes(lang)) return;
-      this.settings.language = lang;
-      if (!this.metrics.languagesUsed.includes(lang)) {
-        this.metrics.languagesUsed.push(lang);
+    checkLevelUp() {
+      let nextLevelXP = this.player.level * 1000;
+      if (this.player.xp >= nextLevelXP) {
+        this.player.xp -= nextLevelXP;
+        this.player.level++;
+        this.checkUnlocks();
+        // Trigger visual event if possible
+        const event = new CustomEvent('adv_levelup', { detail: { level: this.player.level } });
+        document.dispatchEvent(event);
       }
-      if (this.metrics.languagesUsed.includes('es') && this.metrics.languagesUsed.includes('en')) {
-        this.unlockReward('polyglot');
+    },
+
+    checkUnlocks() {
+      if (this.player.level >= 2 && !this.player.unlockedZones.includes('lluvia')) {
+        this.player.unlockedZones.push('lluvia');
+        this.unlockReward('escudo_lluvia');
       }
-      this.saveGame();
+      if (this.player.level >= 5 && !this.player.unlockedZones.includes('palabras')) {
+        this.player.unlockedZones.push('palabras');
+        this.unlockReward('lupa_magica');
+      }
+      if (this.player.level >= 8 && !this.player.unlockedZones.includes('ahorcado')) {
+        this.player.unlockedZones.push('ahorcado');
+        this.unlockReward('corazon_fenix');
+      }
     },
 
     unlockReward(rewardId) {
       if (this.player.rewards.includes(rewardId)) return;
       this.player.rewards.push(rewardId);
       this.saveGame();
+      const reward = this.rewardCatalog.find(r => r.id === rewardId);
+      if (reward) {
+        const event = new CustomEvent('adv_reward', { detail: reward });
+        document.dispatchEvent(event);
+      }
+    },
+
+    hasRewardType(type) {
+      return this.player.rewards.some(rid => {
+        let r = this.rewardCatalog.find(cat => cat.id === rid);
+        return r && r.type === type;
+      });
+    },
+
+    applyBuffs() {
+        if(this.hasRewardType('buff_lives_global')) {
+            this.player.lives = 4;
+        } else {
+            this.player.lives = 3;
+        }
     },
 
     registerLetterResult(letter, ok) {
       const key = String(letter || '').toUpperCase();
       if (!key) return;
-      if (!this.progress.letters[key]) this.progress.letters[key] = { hits: 0, fails: 0 };
+      if (!this.progress.letters[key]) this.progress.letters[key] = { hits: 0, fails: 0, mastered: false };
       if (ok) {
         this.progress.letters[key].hits += 1;
-        this.metrics.lettersWithoutFail += 1;
+        if(this.progress.letters[key].hits >= 5) this.progress.letters[key].mastered = true;
       } else {
         this.progress.letters[key].fails += 1;
-        this.metrics.lettersWithoutFail = 0;
       }
-      if (this.metrics.lettersWithoutFail >= 10) this.unlockReward('letters_streak_10');
-      this.saveGame();
-    },
-
-    registerWordResult(word, completed) {
-      const key = String(word || '').toUpperCase();
-      if (!key) return;
-      if (!this.progress.words[key]) this.progress.words[key] = { completed: 0, attempts: 0 };
-      this.progress.words[key].attempts += 1;
-      if (completed) {
-        this.progress.words[key].completed += 1;
-        this.unlockReward('word_master_1');
-      }
-      this.saveGame();
-    },
-
-    getLetterWeight(letter) {
-      const l = this.progress.letters[String(letter || '').toUpperCase()] || { hits: 0, fails: 0 };
-      const delta = l.fails - l.hits;
-      return Math.max(1, 1 + delta);
-    },
-
-    canUseWord(word) {
-      const len = String(word || '').replace(/\s/g, '').length;
-      if (this.player.level <= 1) return len <= 3;
-      if (this.player.level === 2) return len <= 4;
-      return len >= 5;
-    },
-
-    resetSessionLives(level) {
-      this.player.lives = 3;
-      if (typeof level === 'number') this.player.level = level;
       this.saveGame();
     }
   };
 
   gameCore.loadGame();
+  gameCore.applyBuffs();
   global.gameCore = gameCore;
 })(window);
