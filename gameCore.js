@@ -1,26 +1,50 @@
 (function (global) {
-  const STORAGE_KEY = 'juegosAuroraAdventure';
+ // Agregar al gameCore.js (actualizar)
+const STORAGE_KEY = 'juegosAuroraAdventure';
 
-  const rewardCatalog = [
-    { id: 'escudo_lluvia', name: 'Escudo de Lluvia', icon: '🛡️', rarity: 'raro', desc: '+1 Vida en Tormenta Veloz', type: 'buff_lives_lluvia' },
-    { id: 'lupa_magica', name: 'Lupa Reveladora', icon: '🔍', rarity: 'epico', desc: 'Bonus de puntos en Ruinas Antiguas', type: 'buff_score_palabras' },
-    { id: 'corazon_fenix', name: 'Corazón Fénix', icon: '❤️', rarity: 'legendario', desc: '+1 Intento extra permanente', type: 'buff_lives_global' },
-    { id: 'letras_pro', name: 'Maestro de Letras', icon: '👑', rarity: 'comun', desc: 'Insignia de dominio del bosque', type: 'badge' }
-  ];
+const defaultState = {
+  player: {
+    name: 'Aventurero',
+    gender: 'boy',
+    avatar: '👦',
+    xp: 0,
+    level: 1,
+    lives: 3,
+    rewards: [],
+    unlockedZones: ['alfabeto'],
+    gameStats: {
+      alfabeto: { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 },
+      lluvia: { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 },
+      palabras: { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 },
+      ahorcado: { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 }
+    }
+  },
+  settings: { language: 'es' },
+  progress: { letters: {}, words: {} },
+  metrics: { gamesPlayed: 0 }
+};
 
-  const defaultState = {
-    player: {
-      name: 'Aventurero',
-      xp: 0,
-      level: 1,
-      lives: 3,
-      rewards: [],
-      unlockedZones: ['alfabeto']
-    },
-    settings: { language: 'es' },
-    progress: { letters: {}, words: {} },
-    metrics: { gamesPlayed: 0 }
-  };
+// Agregar este método al gameCore
+updateGameStats(gameId, score, level, won) {
+  if (!this.player.gameStats[gameId]) {
+    this.player.gameStats[gameId] = { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 };
+  }
+  const stats = this.player.gameStats[gameId];
+  stats.score += score;
+  stats.plays++;
+  stats.level = Math.max(stats.level, level);
+  stats.bestScore = Math.max(stats.bestScore, score);
+  if (won) stats.wins++;
+  
+  // También guardar en localStorage separado para compatibilidad
+  localStorage.setItem(`aurora_stats_${gameId}`, JSON.stringify(stats));
+  this.saveGame();
+},
+
+// También agregar para obtener estadísticas
+getGameStats(gameId) {
+  return this.player.gameStats[gameId] || { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 };
+}
 
   function clone(v) { return JSON.parse(JSON.stringify(v)); }
 
