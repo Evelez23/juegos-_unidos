@@ -7,6 +7,13 @@
   <link rel="icon" href="data:," />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./styles.css" />
+<script>
+  // Verificar si existe perfil
+  const profile = localStorage.getItem('auroraPlayerProfile');
+  if (!profile) {
+    window.location.href = 'profile.html';
+  }
+</script>
   <script src="./gameCore.js"></script>
 </head>
 <body>
