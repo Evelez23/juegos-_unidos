@@ -1,0 +1,142 @@
+:root {
+    --primary: #FF6B9D; --secondary: #C44569; --accent1: #FFC312; --accent2: #12CBC4;
+    --accent3: #B53471; --accent4: #6C5CE7; --accent5: #00D2D3; --accent6: #FF9F43;
+    --bg: #1a1a2e; --card: #16213e; --text: #f1f2f6;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); overflow-x: hidden; }
+
+/* Background Animations (bubbles y stars) */
+.bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
+.bg-animation .bubble { position: absolute; border-radius: 50%; opacity: 0.15; animation: float 15s infinite ease-in-out; }
+.bg-animation .bubble:nth-child(1) { width: 80px; height: 80px; background: var(--primary); left: 10%; top: 20%; }
+.bg-animation .bubble:nth-child(2) { width: 120px; height: 120px; background: var(--accent2); left: 70%; top: 60%; animation-delay: 2s; }
+.bg-animation .bubble:nth-child(3) { width: 60px; height: 60px; background: var(--accent1); left: 40%; top: 80%; animation-delay: 4s; }
+.bg-animation .bubble:nth-child(4) { width: 100px; height: 100px; background: var(--accent4); left: 80%; top: 10%; animation-delay: 1s; }
+.bg-animation .bubble:nth-child(5) { width: 70px; height: 70px; background: var(--accent5); left: 20%; top: 70%; animation-delay: 3s; }
+.bg-animation .bubble:nth-child(6) { width: 90px; height: 90px; background: var(--accent6); left: 55%; top: 30%; animation-delay: 5s; }
+@keyframes float { 0%,100%{transform:translateY(0) rotate(0deg)} 33%{transform:translateY(-30px) rotate(120deg)} 66%{transform:translateY(20px) rotate(240deg)} }
+
+.stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+.star { position: absolute; width: 4px; height: 4px; background: white; border-radius: 50%; animation: twinkle 2s infinite ease-in-out; }
+@keyframes twinkle { 0%,100%{opacity:0.2;transform:scale(1)} 50%{opacity:1;transform:scale(1.5)} }
+
+/* Main Menu */
+.main-menu { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; position: relative; z-index: 10; padding: 20px; }
+.menu-title { font-family: 'Fredoka One', cursive; font-size: 3.5rem; background: linear-gradient(90deg, var(--primary), var(--accent2), var(--accent1)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 40px; text-align: center; }
+.games-grid { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; max-width: 1200px; margin-bottom: 30px; }
+.game-card { background: linear-gradient(135deg, var(--card), #1e2a4a); border-radius: 30px; padding: 30px; text-align: center; cursor: pointer; border: 2px solid rgba(255,255,255,0.1); transition: all 0.4s; width: 260px; }
+.game-card:hover { transform: translateY(-10px) scale(1.02); border-color: var(--accent2); }
+.game-card .emoji { font-size: 4rem; display: block; margin-bottom: 15px; }
+.game-card h3 { font-family: 'Fredoka One', cursive; font-size: 1.5rem; margin-bottom: 10px; color: #fff; }
+.game-card p { color: #a0a0a0; font-size: 0.95rem; }
+
+/* User Bar */
+.user-bar { position: fixed; top: 15px; right: 20px; z-index: 100; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); padding: 8px 16px; border-radius: 50px; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2); }
+.user-avatar-small { font-size: 1.5rem; }
+.user-name-small { font-weight: bold; color: var(--accent1); }
+.user-score-small { color: white; }
+.switch-user-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 4px 10px; border-radius: 20px; cursor: pointer; font-size: 0.75rem; }
+.back-btn { position: fixed; top: 20px; left: 20px; z-index: 2000; background: linear-gradient(135deg, var(--accent4), var(--accent3)); color: white; border: none; border-radius: 50px; padding: 10px 20px; font-family: 'Fredoka One', cursive; cursor: pointer; display: none; }
+.footer-links { text-align: center; margin-top: 20px; }
+.footer-links a { color: var(--accent1); text-decoration: none; margin: 0 10px; }
+
+/* Game Containers */
+#ahorcado-app, #alfabeto-app, #lluvia-app, #palabras-app { display: none; position: relative; z-index: 1; min-height: 100vh; padding: 20px; }
+
+/* Score Board (común) */
+.score-board { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+.score-item { background: linear-gradient(135deg, var(--card), #1e2a4a); border-radius: 20px; padding: 10px 20px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.1); }
+.score-item .icon { font-size: 1.5rem; }
+.score-item .label { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+.score-item .value { font-family: 'Fredoka One', cursive; font-size: 1.3rem; color: var(--accent1); }
+
+/* Botones de idioma/dificultad */
+.lang-selector, .category-selector, .phase-selector, .mode-selector { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px; }
+.lang-btn, .category-btn, .phase-btn, .mode-btn { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); color: white; padding: 8px 16px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+.lang-btn.active, .category-btn.active, .phase-btn.active, .mode-btn.active { background: linear-gradient(135deg, var(--primary), var(--secondary)); border-color: transparent; }
+.selector-label { width: 100%; text-align: center; color: #888; font-size: 0.8rem; margin-bottom: 5px; text-transform: uppercase; }
+
+/* Word Display (Ahorcado y Alfabeto) */
+.word-display { background: linear-gradient(135deg, var(--card), #1e2a4a); border-radius: 25px; padding: 25px; text-align: center; margin-bottom: 20px; }
+.word-slots { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+.letter-slot { width: 60px; height: 70px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka One', cursive; font-size: 2rem; color: white; }
+.letter-slot.filled { background: linear-gradient(135deg, var(--accent2), #00D2D3); border-color: transparent; }
+
+/* Hangman */
+.hangman-drawing { width: 200px; height: 250px; position: relative; margin: 0 auto; }
+.hangman-part { position: absolute; opacity: 0; transition: opacity 0.5s; }
+.hangman-part.show { opacity: 1; }
+.part-base { bottom: 0; left: 20px; width: 100px; height: 8px; background: #8B4513; }
+.part-pole { bottom: 0; left: 65px; width: 8px; height: 200px; background: #8B4513; }
+.part-top { top: 40px; left: 65px; width: 80px; height: 8px; background: #8B4513; }
+.part-rope { top: 48px; left: 135px; width: 4px; height: 30px; background: #DEB887; }
+.part-head { top: 70px; left: 115px; width: 45px; height: 45px; border: 4px solid var(--accent6); border-radius: 50%; background: #FFE4B5; }
+.part-body { top: 115px; left: 135px; width: 4px; height: 60px; background: var(--primary); }
+.part-arm-left { top: 125px; left: 105px; width: 35px; height: 4px; background: var(--primary); transform: rotate(-30deg); transform-origin: right center; }
+.part-arm-right { top: 125px; left: 135px; width: 35px; height: 4px; background: var(--primary); transform: rotate(30deg); transform-origin: left center; }
+.part-leg-left { top: 175px; left: 110px; width: 35px; height: 4px; background: var(--primary); transform: rotate(-45deg); }
+.part-leg-right { top: 175px; left: 130px; width: 35px; height: 4px; background: var(--primary); transform: rotate(45deg); }
+
+/* Keyboards */
+.keyboard { display: flex; flex-direction: column; gap: 8px; align-items: center; margin-top: 20px; }
+.keyboard-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.key-btn { width: 45px; height: 50px; border: none; border-radius: 12px; font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: white; cursor: pointer; transition: all 0.2s; }
+.key-btn.correct { background: #2ecc71 !important; }
+.key-btn.wrong { background: #e74c3c !important; opacity: 0.5; }
+
+/* Lives */
+.lives-display { text-align: center; margin: 15px 0; }
+.hearts { font-size: 1.5rem; letter-spacing: 3px; }
+
+/* Overlays */
+.result-overlay, .game-over, .start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26,26,46,0.95); backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+.result-overlay.show, .game-over.show, .start-screen:not(.hidden) { display: flex; }
+.start-screen.hidden { display: none; }
+.result-overlay .emoji, .game-over .trophy, .start-screen .mascot { font-size: 5rem; margin-bottom: 20px; animation: bounce 1s infinite; }
+@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-20px)} }
+.restart-btn, .start-btn { background: linear-gradient(135deg, var(--accent2), #00D2D3); border: none; color: white; padding: 12px 30px; border-radius: 30px; font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer; margin-top: 20px; }
+
+/* Alfabeto específico */
+.target-display { text-align: center; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 20px; margin-bottom: 20px; position: relative; }
+.target-letter { font-family: 'Fredoka One', cursive; font-size: 5rem; transition: all 0.3s; }
+.target-letter.hidden-letter { opacity: 0; transform: scale(0.5); }
+.speak-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 1.2rem; cursor: pointer; }
+.letter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 12px; }
+.letter-card { aspect-ratio: 1; background: linear-gradient(135deg, #FF6B9D, #C44569); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka One', cursive; font-size: 2rem; cursor: pointer; transition: all 0.3s; }
+.letter-card.correct { background: #2ecc71 !important; }
+.letter-card.wrong { background: #e74c3c !important; }
+.progress-container { margin: 20px 0; }
+.progress-bar { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent1)); transition: width 0.5s; }
+
+/* Lluvia de Letras */
+.ll-area { position: relative; width: 100%; max-width: 700px; height: 500px; background: rgba(26,26,46,0.8); border-radius: 20px; overflow: hidden; border: 2px solid rgba(255,255,255,0.1); margin-top: 20px; }
+.ll-falling { position: absolute; font-family: 'Fredoka One', cursive; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: transform 0.1s; user-select: none; }
+.ll-falling.letter { width: 50px; height: 50px; font-size: 2rem; background: linear-gradient(135deg, var(--accent4), var(--accent2)); color: white; }
+.ll-falling.target { background: linear-gradient(135deg, var(--primary), var(--accent1)); }
+.ll-falling.heart { width: 45px; height: 45px; font-size: 1.8rem; background: #e74c3c; }
+.ll-falling.bomb { width: 50px; height: 50px; font-size: 2rem; background: #333; border: 2px solid #e74c3c; }
+.ll-target-display { font-size: 1.5rem; color: var(--accent1); text-align: center; margin: 15px 0; font-family: 'Fredoka One', cursive; }
+
+/* Palabras Escondidas */
+.pe-word-area { display: flex; justify-content: center; gap: 10px; margin: 30px 0; flex-wrap: wrap; }
+.pe-slot { width: 60px; height: 70px; border: 3px dashed rgba(255,255,255,0.3); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka One', cursive; font-size: 2rem; color: white; cursor: pointer; background: rgba(0,0,0,0.2); }
+.pe-slot.filled { border-style: solid; border-color: var(--accent2); background: linear-gradient(135deg, var(--card), #1e2a4a); }
+.pe-letters-area { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 20px; }
+.pe-letter-btn { width: 60px; height: 70px; border-radius: 15px; background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; font-family: 'Fredoka One', cursive; font-size: 2rem; color: white; cursor: pointer; transition: all 0.2s; }
+.pe-letter-btn.hidden { opacity: 0; pointer-events: none; }
+.pe-prizes { margin-top: 20px; text-align: center; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; }
+.pe-prize-list { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; font-size: 2rem; }
+.collection-panel { margin-top: 20px; background: rgba(255,255,255,0.03); padding: 15px; border-radius: 15px; }
+.collection-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+.collection-item.locked { filter: grayscale(1); opacity: 0.4; }
+
+/* Responsive */
+@media (max-width: 600px) {
+    .menu-title { font-size: 2rem; }
+    .letter-slot, .pe-slot { width: 45px; height: 55px; font-size: 1.5rem; }
+    .key-btn { width: 35px; height: 42px; font-size: 1rem; }
+    .letter-card { font-size: 1.5rem; }
+    .target-letter { font-size: 3rem; }
+}
