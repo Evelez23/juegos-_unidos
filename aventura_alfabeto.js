@@ -293,6 +293,50 @@ function al_nextRound() {
     }
 
     al_gameState.round++;
+    
+    // COMPLETÓ EL NIVEL ACTUAL (10 letras)
+    if (al_gameState.round > al_gameState.totalRounds) {
+        // Usar gameCore para registrar progreso
+        const result = gameCore.advanceAlfabeto(al_gameState.correctAnswers, al_gameState.totalRounds);
+        
+        if (result.levelUp) {
+            // Subió de nivel dentro del juego
+            al_gameState.level = result.newLevel;
+            al_playSound('levelup');
+            al_showLevelUp();
+            
+            // Cambiar modo según nivel (fácil→medio→difícil)
+            if (al_gameState.level === 2) al_setMode('medio', true);
+            if (al_gameState.level === 3) al_setMode('dificil', true);
+            if (al_gameState.level === 4) al_setMode('dictado', true);
+            
+            // Cambiar fase cada 3 niveles
+            if (result.phaseUp) {
+                al_setPhase(result.newPhase, true);
+                al_showPhaseUp(result.newPhase);
+            }
+            
+            // Reiniciar para el nuevo nivel
+            al_gameState.round = 1;
+            al_gameState.correctAnswers = 0;
+            al_gameState.totalRounds = 10; // 10 letras por nivel
+            
+            // Mostrar overlay de nivel completado (no game over)
+            al_showLevelComplete(result.newLevel, result.phaseUp, result.gameCompleted);
+            
+            // Si completó el juego (nivel 3 alcanzado), mostrar premio y sugerir siguiente juego
+            if (result.gameCompleted) {
+                setTimeout(() => {
+                    al_showGameComplete();
+                }, 1500);
+            }
+            
+            al_updateUI();
+            al_nextRound();
+            return;
+        }
+    }
+    al_gameState.round++;
     if (al_gameState.round > al_gameState.totalRounds) {
         al_gameState.level++;
         const pointsEarned = al_gameState.score;
@@ -594,4 +638,85 @@ function al_restartGame() {
     if (restartBtn) restartBtn.textContent = '¡Jugar de Nuevo! 🎮';
     al_resetGame();
     al_nextRound();
+}
+    function al_showLevelComplete(level, phaseUp, gameCompleted) {
+    const overlay = document.getElementById('al_levelCompleteOverlay');
+    if (!overlay) {
+        // Crear overlay si no existe
+        const newOverlay = document.createElement('div');
+        newOverlay.id = 'al_levelCompleteOverlay';
+        newOverlay.className = 'result-overlay';
+        newOverlay.innerHTML = `
+            <div class="emoji">🎉</div>
+            <h2>¡NIVEL ${level} COMPLETADO!</h2>
+            <p class="word-reveal">¡Sigue así, aventurero!</p>
+            <button class="restart-btn" onclick="al_continueToNextLevel()">Continuar 🚀</button>
+        `;
+        document.getElementById('alfabeto-app').appendChild(newOverlay);
+    }
+    
+    const titleEl = overlay.querySelector('h2');
+    if (phaseUp) {
+        titleEl.innerHTML = `¡NIVEL ${level} COMPLETADO!<br><span style="font-size:1.2rem;">✨ ¡FASE ${gameCore.player.gameStats.alfabeto.currentPhase} DESBLOQUEADA! ✨</span>`;
+    }
+    if (gameCompleted) {
+        titleEl.innerHTML = `🎉 ¡BOSQUE COMPLETADO! 🎉<br><span style="font-size:1.2rem;">🌟 ¡Has ganado la LLAVE DEL TORRENTE! 🌟</span>`;
+        const btn = overlay.querySelector('.restart-btn');
+        btn.textContent = '✨ Continuar al Siguiente Juego ✨';
+        btn.onclick = () => {
+            overlay.classList.remove('show');
+            al_goToNextGame();
+        };
+    }
+    
+    overlay.classList.add('show');
+}
+
+function al_continueToNextLevel() {
+    document.getElementById('al_levelCompleteOverlay').classList.remove('show');
+    al_nextRound();
+}
+
+function al_goToNextGame() {
+    // Mostrar mensaje de que puede jugar el siguiente juego
+    alert('🎉 ¡Felicidades! Has completado el Bosque de Letras.\n\n☔ Ahora puedes jugar TORRENTE DE PALABRAS (Lluvia de Letras)');
+    
+    // Volver al mapa principal
+    if (typeof showMainMenu === 'function') {
+        showMainMenu();
+    } else {
+        window.location.href = 'index.html';
+    }
+}
+
+function al_showPhaseUp(phase) {
+    const phaseNames = ['', '👁️ Ver + Escuchar', '🙈 Memorizar', '🎧 Solo Escuchar'];
+    const phaseEl = document.createElement('div');
+    phaseEl.className = 'level-up';
+    phaseEl.textContent = `✨ ¡FASE ${phase}: ${phaseNames[phase]}! ✨`;
+    document.body.appendChild(phaseEl);
+    setTimeout(() => phaseEl.remove(), 2000);
+}
+
+function al_setMode(mode, fromLevelUp = false) {
+    al_gameState.mode = mode;
+    document.querySelectorAll('#alfabeto-app .mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+    // No reiniciar el juego si viene de level up
+    if (al_gameState.isPlaying && !fromLevelUp) {
+        al_resetGame();
+        al_nextRound();
+    }
+}
+
+function al_setPhase(phase, fromLevelUp = false) {
+    al_gameState.phase = phase;
+    document.querySelectorAll('#alfabeto-app .phase-btn').forEach(btn => {
+        btn.classList.toggle('active', parseInt(btn.dataset.phase) === phase);
+    });
+    if (al_gameState.isPlaying && !fromLevelUp) {
+        al_resetGame();
+        al_nextRound();
+    }
 }
