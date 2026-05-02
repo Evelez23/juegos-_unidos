@@ -1,175 +1,1214 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mundo Mágico de Aurora</title>
-  <link rel="icon" href="data:," />
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="./styles.css" />
-<script>
-  // Verificar si existe perfil
-  const profile = localStorage.getItem('auroraPlayerProfile');
-  if (!profile) {
-    window.location.href = 'profile.html';
-  }
-</script>
-  <script src="./gameCore.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Juegos Aurora - Mundo Mágico</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B9D;
+            --secondary: #C44569;
+            --accent1: #FFC312;
+            --accent2: #12CBC4;
+            --accent3: #B53471;
+            --accent4: #6C5CE7;
+            --accent5: #00D2D3;
+            --accent6: #FF9F43;
+            --bg: #1a1a2e;
+            --card: #16213e;
+            --text: #f1f2f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text);
+        }
+
+        /* Background Animations */
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-animation .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .bubble:nth-child(1) { width: 80px; height: 80px; background: var(--primary); left: 10%; top: 20%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 120px; height: 120px; background: var(--accent2); left: 70%; top: 60%; animation-delay: 2s; }
+        .bubble:nth-child(3) { width: 60px; height: 60px; background: var(--accent1); left: 40%; top: 80%; animation-delay: 4s; }
+        .bubble:nth-child(4) { width: 100px; height: 100px; background: var(--accent4); left: 80%; top: 10%; animation-delay: 1s; }
+        .bubble:nth-child(5) { width: 70px; height: 70px; background: var(--accent5); left: 20%; top: 70%; animation-delay: 3s; }
+        .bubble:nth-child(6) { width: 90px; height: 90px; background: var(--accent6); left: 55%; top: 30%; animation-delay: 5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(20px) rotate(240deg); }
+        }
+
+        .stars {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        /* Main Menu */
+        .main-menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .menu-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3.5rem;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #FF6B9D, #FFC312, #12CBC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 107, 157, 0.3);
+            animation: title-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes title-glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.2); }
+        }
+
+        .welcome-message {
+            font-size: 1.2rem;
+            color: var(--accent1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .game-card:hover::before {
+            left: 100%;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(233, 69, 96, 0.2);
+            border-color: rgba(233, 69, 96, 0.3);
+        }
+
+        .game-card .emoji {
+            font-size: 4rem;
+            display: block;
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+
+        .game-card:hover .emoji {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .game-card h3 {
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .game-card p {
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* User Bar */
+        .user-bar {
+            position: fixed;
+            top: 15px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .user-avatar-small {
+            font-size: 1.5rem;
+        }
+
+        .user-name-small {
+            font-weight: bold;
+            color: var(--accent1);
+        }
+
+        .user-score-small {
+            color: white;
+        }
+
+        .user-bar a {
+            color: var(--accent2);
+            text-decoration: none;
+            margin-left: 5px;
+        }
+
+        .user-bar a:hover {
+            text-decoration: underline;
+        }
+
+        .switch-user-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .switch-user-btn:hover {
+            background: rgba(255,107,157,0.3);
+            border-color: var(--primary);
+        }
+
+        /* Footer */
+        .footer-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .footer-links a {
+            color: var(--accent1);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .menu-title { font-size: 2.5rem; }
+            .game-card { padding: 20px; }
+            .user-bar { padding: 6px 12px; font-size: 0.75rem; }
+            .user-bar a { font-size: 0.75rem; }
+        }
+
+        /* Game Containers (inicialmente ocultos) */
+        #ahorcado-app, #alfabeto-app, #lluvia-app, #palabras-app {
+            display: none;
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 20px;
+        }
+    </style>
+    <script src="./gameCore.js"></script>
 </head>
 <body>
-  <div class="bg-animation">
-    <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
-    <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
-  </div>
-  <div class="stars" id="global-stars"></div>
+    <div class="bg-animation">
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+    </div>
+    <div class="stars" id="global-stars"></div>
 
-  <!-- Sistema de Aventura (Reemplaza al Main Menu) -->
-  <div id="adventure-system" class="adventure-system">
-      <div class="adv-header">
-          <div class="adv-profile">
-              <div class="adv-avatar" id="adv_avatar">🦸‍♂️</div>
-              <div class="adv-stats">
-                  <h2 id="adv_playerName">Aventurero</h2>
-                  <div class="adv-level">Nivel <span id="adv_playerLevel">1</span></div>
-              </div>
-          </div>
-          <div class="adv-progress">
-              <div class="adv-progress-text">Exp: <span id="adv_progressText">0 / 1000</span></div>
-              <div class="adv-progress-bar"><div class="adv-progress-fill" id="adv_progressFill" style="width: 0%"></div></div>
-          </div>
-          <button class="adv-inventory-btn" onclick="openInventory()">🎒 Inventario</button>
-      </div>
+    <!-- Barra de Usuario Activo -->
+    <div class="user-bar" id="userBar">
+        <div class="user-avatar-small" id="userAvatar">👤</div>
+        <div class="user-name-small" id="userName">Cargando...</div>
+        <div class="user-score-small" id="userScore">🏆 0 pts</div>
+        <button class="switch-user-btn" onclick="switchUser()">🔄 Cambiar</button>
+        <a href="dashboard.html" id="dashboardLink">📊 Ranking</a>
+    </div>
 
-      <h1 class="adv-title">El Mundo Mágico de Aurora</h1>
+    <!-- Botón Volver (oculto inicialmente) -->
+    <button id="mainBackBtn" class="back-btn" style="display:none;" onclick="showMainMenu()">🏠 Volver al Menú</button>
 
-      <div class="adv-map">
-          <!-- Zona 1: Bosque de Letras -->
-          <a class="adv-zone zone-unlocked" id="zone_alfabeto" href="./aventura_alfabeto_2.html" style="text-decoration:none;">
-              <div class="zone-icon">🌳</div>
-              <div class="zone-name">Bosque de Letras</div>
-          </a>
-
-          <!-- Zona 2: Tormenta de Lluvia -->
-          <a class="adv-zone zone-locked" id="zone_lluvia" href="#" onclick="checkLock(event, 'lluvia', './lluvia.html')" style="text-decoration:none;">
-              <div class="zone-icon">☔</div>
-              <div class="zone-name">Tormenta Veloz</div>
-              <div class="zone-lock" id="lock_lluvia">🔒 Nivel 2</div>
-          </a>
-
-          <!-- Zona 3: Ruinas de Palabras -->
-          <a class="adv-zone zone-locked" id="zone_palabras" href="#" onclick="checkLock(event, 'palabras', './palabras.html')" style="text-decoration:none;">
-              <div class="zone-icon">🧩</div>
-              <div class="zone-name">Ruinas Antiguas</div>
-              <div class="zone-lock" id="lock_palabras">🔒 Nivel 5</div>
-          </a>
-
-          <!-- Zona 4: Torre del Ahorcado -->
-          <a class="adv-zone zone-locked" id="zone_ahorcado" href="#" onclick="checkLock(event, 'ahorcado', './ahorcado.html')" style="text-decoration:none;">
-              <div class="zone-icon">🎪</div>
-              <div class="zone-name">Torre Mágica</div>
-              <div class="zone-lock" id="lock_ahorcado">🔒 Nivel 8</div>
-          </a>
-      </div>
-  </div>
-
-  <!-- Inventory Overlay -->
-  <div class="adv-inventory-overlay" id="adv_inventory" style="display: none;">
-      <div class="adv-inventory-content">
-          <button class="adv-close-btn" onclick="closeInventory()">✖</button>
-          <h2>Tu Inventario Mágico 🎒</h2>
-          <div class="adv-inventory-grid" id="adv_inventoryGrid"></div>
-      </div>
-  </div>
-
-  <script>
-    (function createStars(){
-      const container = document.getElementById('global-stars');
-      for (let i=0;i<50;i++) {
-        const star = document.createElement('div');
-        star.className='star';
-        star.style.left = Math.random()*100+'%';
-        star.style.top = Math.random()*100+'%';
-        star.style.animationDelay = Math.random()*2+'s';
-        star.style.width = star.style.height = (Math.random()*3+2)+'px';
-        container.appendChild(star);
-      }
-    })();
-
-    function updateUI() {
-        document.getElementById('adv_playerLevel').textContent = gameCore.player.level;
-        let nextXP = gameCore.player.level * 1000;
-        document.getElementById('adv_progressText').textContent = `${gameCore.player.xp} / ${nextXP}`;
-        document.getElementById('adv_progressFill').style.width = `${(gameCore.player.xp / nextXP) * 100}%`;
-
-        const zones = ['lluvia', 'palabras', 'ahorcado'];
-        zones.forEach(z => {
-            let zEl = document.getElementById(`zone_${z}`);
-            let lEl = document.getElementById(`lock_${z}`);
-            if (zEl && lEl) {
-                if (gameCore.player.unlockedZones.includes(z)) {
-                    zEl.className = 'adv-zone zone-unlocked';
-                    lEl.style.display = 'none';
-                } else {
-                    zEl.className = 'adv-zone zone-locked';
-                    lEl.style.display = 'block';
-                }
-            }
-        });
-    }
-
-    function checkLock(e, zone, url) {
-        if (!gameCore.player.unlockedZones.includes(zone)) {
-            e.preventDefault();
-            let zEl = document.getElementById(`zone_${zone}`);
-            zEl.style.transform = 'translateY(5px)';
-            setTimeout(() => zEl.style.transform = 'none', 100);
-            return false;
-        } else {
-            window.location.href = url;
-        }
-    }
-
-    function openInventory() {
-        document.getElementById('adv_inventory').style.display = 'flex';
-        let grid = document.getElementById('adv_inventoryGrid');
-        grid.innerHTML = '';
+    <!-- Main Menu -->
+    <div id="main-menu" class="main-menu">
+        <h1 class="menu-title">Juegos Aurora<br><span style="font-size: 1.5rem; color: #a0a0a0;">Bilingual School</span></h1>
         
-        if(gameCore.player.rewards.length === 0) {
-            grid.innerHTML = '<p style="color:#aaa; grid-column:1/-1;">Sube de nivel para desbloquear premios mágicos.</p>';
-        } else {
-            gameCore.player.rewards.forEach(rid => {
-                let item = gameCore.rewardCatalog.find(r => r.id === rid);
-                if(item) {
-                    let div = document.createElement('div');
-                    div.className = `inv-item ${item.rarity}`;
-                    div.innerHTML = `
-                        <div class="inv-icon">${item.icon}</div>
-                        <div class="inv-name">${item.name}</div>
-                        <div class="inv-desc">${item.desc}</div>
-                    `;
-                    grid.appendChild(div);
-                }
-            });
+        <div class="welcome-message" id="welcomeMessage">
+            ✨ ¡Bienvenido! Elige un juego para comenzar ✨
+        </div>
+
+        <div class="games-grid">
+            <div class="game-card" onclick="openGame('alfabeto')">
+                <span class="emoji">🌈</span>
+                <h3>Aventura del Alfabeto</h3>
+                <p>Encuentra y memoriza las letras con ayuda del unicornio mágico.</p>
+            </div>
+
+            <div class="game-card" onclick="openGame('lluvia')">
+                <span class="emoji">☔</span>
+                <h3>Lluvia de Letras</h3>
+                <p>Atrapa las letras correctas que caen del cielo. ¡Cuidado con las bombas!</p>
+            </div>
+            
+            <div class="game-card" onclick="openGame('palabras')">
+                <span class="emoji">🧩</span>
+                <h3>Palabras Escondidas</h3>
+                <p>Ordena las letras para formar la palabra y colecciona premios mágicos.</p>
+            </div>
+
+            <div class="game-card" onclick="openGame('ahorcado')">
+                <span class="emoji">🎪</span>
+                <h3>Ahorcado Mágico</h3>
+                <p>Descubre las palabras ocultas antes de que se dibuje el muñeco.</p>
+            </div>
+        </div>
+
+        <div class="footer-links">
+            <a href="user_manager.html">👥 Todos los Jugadores</a>
+            <a href="dashboard.html">🏆 Ranking Global</a>
+        </div>
+    </div>
+
+    <!-- Ahorcado Container -->
+    <div id="ahorcado-app">
+        <div class="game-container">
+            <div class="header">
+                <h1>🎪 Ahorcado Mágico</h1>
+                <p class="subtitle">Aurora Bilingual School</p>
+            </div>
+
+            <div class="score-board">
+                <div class="score-item">
+                    <span class="icon">⭐</span>
+                    <div>
+                        <div class="label">Puntos</div>
+                        <div class="value" id="ah_score">0</div>
+                    </div>
+                </div>
+                <div class="score-item">
+                    <span class="icon">🏆</span>
+                    <div>
+                        <div class="label">Ganadas</div>
+                        <div class="value" id="ah_wins">0</div>
+                    </div>
+                </div>
+                <div class="score-item">
+                    <span class="icon">🎯</span>
+                    <div>
+                        <div class="label">Palabras</div>
+                        <div class="value" id="ah_wordsCount">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lang-selector">
+                <button class="lang-btn active" data-lang="es" onclick="ah_setLanguage('es')">🇪🇸 Español</button>
+                <button class="lang-btn" data-lang="en" onclick="ah_setLanguage('en')">🇺🇸 English</button>
+                <button class="lang-btn" data-lang="both" onclick="ah_setLanguage('both')">🌎 Ambos</button>
+            </div>
+
+            <div class="category-selector" id="ah_categorySelector">
+                <button class="category-btn active" data-cat="animals" onclick="ah_setCategory('animals')">🐱 Animales</button>
+                <button class="category-btn" data-cat="family" onclick="ah_setCategory('family')">👨‍👩‍👧 Familia</button>
+                <button class="category-btn" data-cat="colors" onclick="ah_setCategory('colors')">🎨 Colores</button>
+                <button class="category-btn" data-cat="food" onclick="ah_setCategory('food')">🍎 Comida</button>
+                <button class="category-btn" data-cat="objects" onclick="ah_setCategory('objects')">🏠 Casa</button>
+                <button class="category-btn" data-cat="mixed" onclick="ah_setCategory('mixed')">🎲 Mixto</button>
+            </div>
+
+            <div class="game-area">
+                <div class="word-display">
+                    <div class="hint" id="ah_hint">
+                        <span class="emoji" id="ah_hintEmoji">🐱</span>
+                        <span id="ah_hintText">Es un animal que dice miau</span>
+                    </div>
+                    <div class="word-slots" id="ah_wordSlots"></div>
+                </div>
+
+                <div class="hangman-area">
+                    <div class="hangman-drawing" id="ah_hangmanDrawing">
+                        <div class="hangman-part part-base" id="ah_part0"></div>
+                        <div class="hangman-part part-pole" id="ah_part1"></div>
+                        <div class="hangman-part part-top" id="ah_part2"></div>
+                        <div class="hangman-part part-rope" id="ah_part3"></div>
+                        <div class="hangman-part part-head" id="ah_part4">
+                            <div class="mouth"></div>
+                        </div>
+                        <div class="hangman-part part-body" id="ah_part5"></div>
+                        <div class="hangman-part part-arm-left" id="ah_part6"></div>
+                        <div class="hangman-part part-arm-right" id="ah_part7"></div>
+                        <div class="hangman-part part-leg-left" id="ah_part8"></div>
+                        <div class="hangman-part part-leg-right" id="ah_part9"></div>
+                    </div>
+                </div>
+
+                <div class="lives-display">
+                    <div class="hearts" id="ah_hearts">❤️❤️❤️❤️❤️❤️❤️❤️❤️❤️</div>
+                    <div class="lives-text" id="ah_livesText">10 intentos restantes</div>
+                </div>
+
+                <div class="keyboard" id="ah_keyboard"></div>
+            </div>
+        </div>
+        
+        <!-- Win Overlay -->
+        <div class="result-overlay" id="ah_winOverlay">
+            <div class="emoji">🎉</div>
+            <h2>¡GANASTE!</h2>
+            <p class="word-reveal">La palabra era: <span id="ah_winWord"></span></p>
+            <button class="restart-btn" onclick="ah_nextWord()">¡Siguiente palabra! 🚀</button>
+        </div>
+
+        <!-- Lose Overlay -->
+        <div class="result-overlay" id="ah_loseOverlay">
+            <div class="emoji">😢</div>
+            <h2>¡Ups!</h2>
+            <p class="word-reveal">La palabra era: <span id="ah_loseWord"></span></p>
+            <button class="restart-btn" onclick="ah_nextWord()">¡Intentar otra! 💪</button>
+        </div>
+    </div>
+
+    <!-- Alfabeto Container -->
+    <div id="alfabeto-app">
+        <div class="game-container">
+            <div class="header">
+                <h1>🌈 Aventura del Alfabeto</h1>
+                <p class="subtitle">Aurora Bilingual School</p>
+            </div>
+
+            <div class="score-board">
+                <div class="score-item">
+                    <span class="icon">⭐</span>
+                    <div>
+                        <div class="label">Puntos</div>
+                        <div class="value" id="al_score">0</div>
+                    </div>
+                </div>
+                <div class="score-item">
+                    <span class="icon">🔥</span>
+                    <div>
+                        <div class="label">Racha</div>
+                        <div class="value" id="al_streak">0</div>
+                    </div>
+                </div>
+                <div class="score-item">
+                    <span class="icon">❤️</span>
+                    <div>
+                        <div class="label">Vidas</div>
+                        <div class="value" id="al_lives">3</div>
+                    </div>
+                </div>
+                <div class="score-item">
+                    <span class="icon">🎯</span>
+                    <div>
+                        <div class="label">Nivel</div>
+                        <div class="value" id="al_level">1</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lang-selector">
+                <div class="selector-label">🗣️ Idioma de la Voz</div>
+                <button class="lang-btn active" data-lang="es" onclick="al_setLanguage('es')">🇪🇸 Español</button>
+                <button class="lang-btn" data-lang="en" onclick="al_setLanguage('en')">🇺🇸 Inglés</button>
+                <button class="lang-btn" data-lang="both" onclick="al_setLanguage('both')">🌎 Ambos</button>
+            </div>
+
+            <div class="phase-selector">
+                <div class="selector-label">🎭 Fase de Aprendizaje</div>
+                <button class="phase-btn active" data-phase="1" onclick="al_setPhase(1)">👁️ Fase 1: Ver + Escuchar</button>
+                <button class="phase-btn" data-phase="2" onclick="al_setPhase(2)">🙈 Fase 2: Memorizar</button>
+                <button class="phase-btn" data-phase="3" onclick="al_setPhase(3)">🎧 Fase 3: Solo Escuchar</button>
+            </div>
+
+            <div class="mode-selector">
+                <div class="selector-label">🎮 Dificultad</div>
+                <button class="mode-btn active" data-mode="facil" onclick="al_setMode('facil')">😊 Fácil</button>
+                <button class="mode-btn" data-mode="medio" onclick="al_setMode('medio')">🤔 Medio</button>
+                <button class="mode-btn" data-mode="dificil" onclick="al_setMode('dificil')">😎 Difícil</button>
+                <button class="mode-btn" data-mode="dictado" onclick="al_setMode('dictado')">📝 Dictado</button>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="al_progressFill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text" id="al_progressText">Progreso: 0/10</div>
+            </div>
+
+            <div class="game-area">
+                <div class="target-display" id="al_targetDisplay">
+                    <button class="speak-btn pulse" id="al_speakBtn" onclick="al_speakLetter()" title="Escuchar de nuevo">🔊</button>
+                    <div class="instruction" id="al_instruction">¡Encuentra la letra!</div>
+                    <div class="target-letter" id="al_targetLetter">A</div>
+                    <div class="timer-bar">
+                        <div class="timer-fill" id="al_timerFill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="letter-grid" id="al_letterGrid"></div>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div class="start-screen" id="al_startScreen">
+            <div class="mascot">🦄</div>
+            <div class="logo">¡Aventura del Alfabeto!</div>
+            <p style="color: #aaa; font-size: 1.1rem; text-align: center; max-width: 400px; margin-bottom: 10px;">
+                ¡Ayuda al unicornio a encontrar las letras!<br>
+                <span style="font-size: 0.9rem;">Aurora Bilingual School</span>
+            </p>
+            <button class="start-btn" id="al_startBtn" type="button" onclick="al_startGame()">¡JUGAR! 🚀</button>
+        </div>
+
+        <!-- Game Over -->
+        <div class="game-over" id="al_gameOver">
+            <div class="trophy">🏆</div>
+            <h2 id="al_gameOverTitle">¡Excelente!</h2>
+            <p class="final-score">Puntuación: <span id="al_finalScore">0</span></p>
+            <p class="final-score">Mejor racha: <span id="al_finalStreak">0</span></p>
+            <p class="final-score">Aciertos: <span id="al_finalCorrect">0</span>/<span id="al_finalTotal">0</span></p>
+            <div class="stars-rating" id="al_starsRating">⭐⭐⭐</div>
+            <button class="restart-btn" onclick="al_restartGame()">¡Jugar de Nuevo! 🎮</button>
+        </div>
+    </div>
+
+    <!-- Lluvia de Letras Container -->
+    <div id="lluvia-app">
+        <div class="game-container">
+            <div class="header">
+                <h1>☔ Lluvia de Letras</h1>
+                <p class="subtitle" id="ll_subtitle">Atrapa la letra correcta</p>
+                <div class="lang-selector" id="ll_langSelector">
+                    <button class="lang-btn active" data-lang="es" onclick="gc_setLangAndRefresh('es')">🇪🇸 Español</button>
+                    <button class="lang-btn" data-lang="en" onclick="gc_setLangAndRefresh('en')">🇺🇸 English</button>
+                </div>
+            </div>
+            <div class="score-board">
+                <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="ll_score">0</div></div></div>
+                <div class="score-item"><span class="icon">❤️</span><div><div class="label">Vidas</div><div class="value" id="ll_lives">3</div></div></div>
+                <div class="score-item"><span class="icon">🎯</span><div><div class="label">Nivel</div><div class="value" id="ll_level">1</div></div></div>
+            </div>
+            <div class="ll-target-display">Atrapa la letra: <span id="ll_targetLetter" style="font-size: 3rem;">A</span></div>
+            <div style="text-align:center; margin-top: 8px;">
+                <button class="restart-btn" id="ll_resetBtn" onclick="ll_restartFromLevelOne()" style="padding:8px 16px; font-size:0.9rem;">Reiniciar nivel 1</button>
+            </div>
+            <div class="ll-area" id="ll_area"></div>
+        </div>
+        
+        <div class="game-over" id="ll_gameOver">
+            <div class="trophy">☔</div>
+            <h2>¡Juego Terminado!</h2>
+            <p class="final-score">Puntuación: <span id="ll_finalScore">0</span></p>
+            <p class="final-score">Nivel alcanzado: <span id="ll_finalLevel">1</span></p>
+            <button class="restart-btn" onclick="ll_startGame()">¡Jugar de Nuevo! 🎮</button>
+        </div>
+    </div>
+
+    <!-- Palabras Escondidas Container -->
+    <div id="palabras-app">
+        <div class="game-container">
+            <div class="header">
+                <h1>🧩 Palabras Escondidas</h1>
+                <p class="subtitle" id="pe_subtitle">Ordena las letras</p>
+                <div class="lang-selector" id="pe_langSelector">
+                    <button class="lang-btn active" data-lang="es" onclick="gc_setLangAndRefresh('es')">🇪🇸 Español</button>
+                    <button class="lang-btn" data-lang="en" onclick="gc_setLangAndRefresh('en')">🇺🇸 English</button>
+                </div>
+            </div>
+            <div class="score-board">
+                <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="pe_score">0</div></div></div>
+                <div class="score-item"><span class="icon">🎯</span><div><div class="label">Nivel</div><div class="value" id="pe_level">1</div></div></div>
+            </div>
+            <div style="text-align:center; margin: 6px 0 12px;">
+                <button class="restart-btn" id="pe_resetBtn" onclick="pe_restartFromLevelOne()" style="padding:8px 16px; font-size:0.9rem;">Reiniciar nivel 1</button>
+            </div>
+            
+            <div class="game-area">
+                <div class="word-display" style="background: none; border: none; box-shadow: none;">
+                    <div class="hint" id="pe_hint" style="font-size: 4rem; margin-bottom: 20px;">🚗</div>
+                    <div class="pe-word-area" id="pe_wordSlots"></div>
+                </div>
+                <div class="pe-letters-area" id="pe_lettersArea"></div>
+            </div>
+            
+            <div class="pe-prizes">
+                <h3 id="pe_rewardsTitle">Colección de Premios Mágicos 🎁</h3>
+                <div class="pe-prize-list" id="pe_prizeList"></div>
+            </div>
+            <div class="collection-panel">
+                <h3 id="pe_collectionTitle">Colección de Recompensas</h3>
+                <div class="collection-grid" id="pe_collectionGrid"></div>
+            </div>
+        </div>
+        
+        <div class="result-overlay" id="pe_winOverlay">
+            <div class="emoji" id="pe_winEmoji">🎉</div>
+            <h2 id="pe_winTitle">¡EXCELENTE!</h2>
+            <p class="word-reveal" id="pe_prizeMsg" style="display: none;">¡Ganaste un nuevo premio!</p>
+            <button class="restart-btn" onclick="pe_nextWord()">Siguiente Palabra 🚀</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== GLOBAL FUNCTIONS ====================
+        
+        function showMainMenu() {
+            document.getElementById('main-menu').style.display = 'flex';
+            document.getElementById('ahorcado-app').style.display = 'none';
+            document.getElementById('alfabeto-app').style.display = 'none';
+            document.getElementById('lluvia-app').style.display = 'none';
+            document.getElementById('palabras-app').style.display = 'none';
+            document.getElementById('mainBackBtn').style.display = 'none';
+            
+            // Stop audio if exists
+            try { if(window.ah_audioCtx) window.ah_audioCtx.suspend(); } catch(e){}
+            try { if(window.al_audioCtx) window.al_audioCtx.suspend(); } catch(e){}
+            try { window.speechSynthesis.cancel(); } catch(e){}
         }
-    }
 
-    function closeInventory() {
-        document.getElementById('adv_inventory').style.display = 'none';
-    }
+        function openGame(game) {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('mainBackBtn').style.display = 'block';
+            
+            if (game === 'ahorcado') {
+                document.getElementById('ahorcado-app').style.display = 'block';
+                try { if(window.ah_audioCtx) window.ah_audioCtx.resume(); } catch(e){}
+                if (typeof ah_resetHangman === 'function') ah_resetHangman();
+                if (typeof ah_nextWord === 'function') ah_nextWord();
+            } else if (game === 'lluvia') {
+                document.getElementById('lluvia-app').style.display = 'block';
+                if (typeof ll_startGame === 'function') ll_startGame();
+            } else if (game === 'palabras') {
+                document.getElementById('palabras-app').style.display = 'block';
+                if (typeof pe_startGame === 'function') pe_startGame();
+            } else if (game === 'alfabeto') {
+                document.getElementById('alfabeto-app').style.display = 'block';
+                const scr = document.getElementById('al_startScreen');
+                if (scr) scr.classList.remove('hidden');
+                try { if(window.al_audioCtx) window.al_audioCtx.resume(); } catch(e){}
+            }
+        }
 
-    // Listeners for UI updates
-    document.addEventListener('adv_levelup', (e) => {
-        alert(`¡Felicidades! Eres Nivel ${e.detail.level}`);
-        updateUI();
-    });
+        function switchUser() {
+            localStorage.removeItem('aurora_active_user');
+            window.location.href = 'user_manager.html';
+        }
+
+        function updateUserBar() {
+            const activeId = localStorage.getItem('aurora_active_user');
+            if (!activeId) {
+                window.location.href = 'user_manager.html';
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('aurora_users') || '[]');
+            const user = users.find(u => u.id === activeId);
+            
+            if (!user) {
+                localStorage.removeItem('aurora_active_user');
+                window.location.href = 'user_manager.html';
+                return;
+            }
+            
+            document.getElementById('userAvatar').textContent = user.avatar || '👤';
+            document.getElementById('userName').textContent = user.name || 'Aventurero';
+            document.getElementById('userScore').innerHTML = `🏆 ${user.stats?.totalScore || 0} pts`;
+            
+            const welcomeMsg = document.getElementById('welcomeMessage');
+            if (welcomeMsg) {
+                welcomeMsg.innerHTML = `✨ ¡Bienvenido, ${user.name}! Elige un juego para comenzar ✨`;
+            }
+        }
+
+        function createStars() {
+            const container = document.getElementById('global-stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                star.style.width = star.style.height = (Math.random() * 3 + 2) + 'px';
+                container.appendChild(star);
+            }
+        }
+        
+        // Inicialización
+        createStars();
+        
+        // Verificar usuario activo al cargar
+        const activeId = localStorage.getItem('aurora_active_user');
+        if (!activeId) {
+            window.location.href = 'user_manager.html';
+        } else {
+            updateUserBar();
+        }
+        
+        // Mostrar menú principal
+        showMainMenu();
+
+        // ==================== FUNCIONES DE RESPALDO ====================
+        // Estas funciones serán sobrescritas por los juegos individuales
+        
+        function gc_setLangAndRefresh(lang) {
+            if (window.gameCore) window.gameCore.setLanguage(lang);
+        }
+        
+        function gc_refreshHeaderLabels() {}
+        
+        // Deshabilitar stars duplicados
+        function ah_createStars() {}
+        function al_createStars() {}
+    </script>
+
+    <!-- Los scripts de los juegos se cargan aquí -->
+    <script src="./ahorcado.js"></script>
+    <script src="./aventura_alfabeto.js"></script>
+    <script src="./lluvia.js"></script>
+    <script src="./palabras.js"></script>
     
-    document.addEventListener('adv_reward', (e) => {
-        const reward = e.detail;
-        alert(`¡NUEVO PREMIO MAGICO!
-${reward.icon} ${reward.name} (${reward.rarity})`);
-    });
-
-    window.addEventListener('load', updateUI);
-  </script>
+    <style>
+        /* Estilos adicionales para los juegos */
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 2000;
+            background: linear-gradient(135deg, #6C5CE7, #B53471);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-family: 'Fredoka One', cursive;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .game-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .score-board {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .score-item {
+            background: linear-gradient(135deg, #16213e, #1e2a4a);
+            border-radius: 20px;
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .score-item .icon { font-size: 1.5rem; }
+        .score-item .label { font-size: 0.75rem; color: #888; }
+        .score-item .value { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: #FFC312; }
+        
+        .lang-selector, .category-selector, .phase-selector, .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .lang-btn, .category-btn, .phase-btn, .mode-btn {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .lang-btn.active, .category-btn.active, .phase-btn.active, .mode-btn.active {
+            background: linear-gradient(135deg, #FF6B9D, #C44569);
+            border-color: transparent;
+        }
+        
+        .word-display {
+            background: linear-gradient(135deg, #16213e, #1e2a4a);
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .word-slots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .letter-slot {
+            width: 60px;
+            height: 70px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            color: white;
+        }
+        
+        .letter-slot.filled {
+            background: linear-gradient(135deg, #12CBC4, #00D2D3);
+            border-color: transparent;
+        }
+        
+        .keyboard {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .key-btn {
+            width: 45px;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .key-btn.correct {
+            background: #2ecc71 !important;
+        }
+        
+        .key-btn.wrong {
+            background: #e74c3c !important;
+            opacity: 0.5;
+        }
+        
+        .result-overlay, .game-over, .start-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26,26,46,0.95);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+        
+        .result-overlay.show, .game-over.show, .start-screen:not(.hidden) {
+            display: flex;
+        }
+        
+        .start-screen.hidden {
+            display: none;
+        }
+        
+        .result-overlay .emoji, .game-over .trophy, .start-screen .mascot {
+            font-size: 6rem;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .result-overlay h2, .game-over h2, .start-screen .logo {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #FF6B9D, #FFC312);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .restart-btn, .start-btn {
+            background: linear-gradient(135deg, #12CBC4, #00D2D3);
+            border: none;
+            color: white;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        
+        .restart-btn:hover, .start-btn:hover {
+            transform: translateY(-3px);
+        }
+        
+        /* Lluvia de Letras */
+        .ll-area {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .ll-falling {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka One', cursive;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        
+        .ll-falling.letter {
+            background: linear-gradient(135deg, #6C5CE7, #a29bfe);
+        }
+        
+        .ll-falling.letter.target {
+            background: linear-gradient(135deg, #FF6B9D, #C44569);
+        }
+        
+        .ll-falling.heart {
+            background: #e74c3c;
+        }
+        
+        .ll-falling.bomb {
+            background: #333;
+        }
+        
+        .ll-target-display {
+            text-align: center;
+            font-size: 1.5rem;
+            margin: 15px 0;
+        }
+        
+        /* Palabras Escondidas */
+        .pe-word-area {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .pe-slot {
+            width: 60px;
+            height: 70px;
+            border: 3px dashed rgba(255,255,255,0.3);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        
+        .pe-slot.filled {
+            border-style: solid;
+            border-color: #12CBC4;
+            background: rgba(18,203,196,0.1);
+        }
+        
+        .pe-letters-area {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .pe-letter-btn {
+            width: 60px;
+            height: 70px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #FF6B9D, #C44569);
+            border: none;
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .pe-letter-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .pe-letter-btn.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .pe-prizes {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+        }
+        
+        .pe-prize-list {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 2rem;
+        }
+        
+        .collection-panel {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 20px;
+        }
+        
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+        }
+        
+        .collection-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        
+        .collection-item.locked {
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+        
+        .selector-label {
+            width: 100%;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #12CBC4, #FFC312);
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        
+        .target-display {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .target-letter {
+            font-family: 'Fredoka One', cursive;
+            font-size: 5rem;
+            transition: all 0.3s;
+        }
+        
+        .target-letter.hidden-letter {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        
+        .speak-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+        
+        .letter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 12px;
+        }
+        
+        .letter-card {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #FF6B9D, #C44569);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka One', cursive;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .letter-card.correct {
+            background: #2ecc71 !important;
+        }
+        
+        .letter-card.wrong {
+            background: #e74c3c !important;
+        }
+        
+        /* Alfabeto adicionales */
+        .countdown-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Fredoka One', cursive;
+            font-size: 4rem;
+            color: #FFC312;
+            animation: countdownPop 0.9s ease-out;
+        }
+        
+        @keyframes countdownPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+        }
+        
+        .timer-bar {
+            margin-top: 15px;
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #12CBC4, #FFC312);
+            transition: width 0.1s linear;
+        }
+        
+        @media (max-width: 600px) {
+            .letter-slot, .pe-slot { width: 45px; height: 55px; font-size: 1.5rem; }
+            .key-btn { width: 35px; height: 42px; font-size: 1rem; }
+            .letter-card { font-size: 1.5rem; }
+            .pe-letter-btn { width: 50px; height: 60px; font-size: 1.5rem; }
+            .target-letter { font-size: 3rem; }
+        }
+    </style>
 </body>
 </html>
