@@ -157,52 +157,73 @@ function pe_slotClick(idx) {
     }
 }
 
+// palabras.js - Ruinas Antiguas
+
 function pe_checkWin() {
     if (!pe_state.slots.includes('')) {
         const formed = pe_state.slots.join('');
         if (formed === pe_state.currentWord) {
-            const points = 40 + (window.gameCore ? window.gameCore.player.level * 5 : 5);
+            // Palabra correcta
+            const points = 50 + (pe_state.level * 10);
+            gameCore.addScore(points, 'palabras');
+            gameCore.registerWordResult(pe_state.currentWord, true);
+            
+            pe_state.correctCount++;
             pe_state.streak++;
             
-            if (window.gameCore) {
-                window.gameCore.addScore(points, 'palabras');
-                window.gameCore.registerWordResult(pe_state.currentWord, true);
-                window.gameCore.player.level++;
+            // Cada 5 palabras correctas = subir de nivel
+            if (pe_state.correctCount >= 5) {
+                pe_state.level++;
+                pe_state.correctCount = 0;
+                
+                // Registrar progreso en gameCore
+                const result = gameCore.advancePalabras(pe_state.level);
+                
+                al_showComboText(window.innerWidth/2, window.innerHeight/2, `📜 ¡NIVEL ${pe_state.level}! 📜`);
+                
+                if (result.gameCompleted) {
+                    setTimeout(() => pe_showGameComplete(), 500);
+                }
             }
             
             pe_updatePrizes();
             pe_renderCollection();
-            
-            const winTitle = document.getElementById('pe_winTitle');
-            if (winTitle) winTitle.textContent = '¡CORRECTO!';
-            
-            setTimeout(() => {
-                const winOverlay = document.getElementById('pe_winOverlay');
-                if (winOverlay) winOverlay.classList.add('show');
-            }, 500);
+            pe_showWinEffect();
+            pe_nextWord();
         } else {
+            // Palabra incorrecta
             pe_state.streak = 0;
-            if (window.gameCore) window.gameCore.registerWordResult(pe_state.currentWord, false);
-            
-            const hint = document.getElementById('pe_hint');
-            if (hint) hint.textContent = '😢';
-            const slotEls = document.querySelectorAll('#pe_wordSlots .pe-slot');
-            slotEls.forEach(el => { el.classList.add('error'); });
-            
-            setTimeout(() => {
-                pe_state.letters = pe_state.currentWord.split('').sort(() => Math.random() - 0.5);
-                pe_state.slots = new Array(pe_state.currentWord.length).fill('');
-                pe_render();
-                slotEls.forEach(el => el.classList.remove('error'));
-                if (hint) {
-                    const wordObj = pe_getWordsFromAhorcado().find(w => w.w === pe_state.currentWord);
-                    if (wordObj) hint.textContent = wordObj.e;
-                }
-            }, 1000);
+            gameCore.registerWordResult(pe_state.currentWord, false);
+            pe_playHardError();
+            pe_showErrorEffect();
         }
     }
 }
 
+function pe_showGameComplete() {
+    const overlay = document.createElement('div');
+    overlay.className = 'result-overlay';
+    overlay.style.zIndex = '3000';
+    overlay.innerHTML = `
+        <div class="emoji">🏛️</div>
+        <h2>¡RUINAS EXPLORADAS!</h2>
+        <p class="word-reveal">Has alcanzado el nivel 8</p>
+        <div style="font-size: 3rem; margin: 10px;">🔐</div>
+        <p>¡Has ganado la LLAVE DE LA TORRE!</p>
+        <button class="restart-btn" onclick="pe_goToNextGame()">✨ Ir a la Torre Mágica ✨</button>
+    `;
+    document.getElementById('palabras-app').appendChild(overlay);
+    overlay.classList.add('show');
+}
+
+function pe_goToNextGame() {
+    alert('🎉 ¡Felicidades! Has completado las Ruinas Antiguas.\n\n🎪 Ahora puedes jugar TORRE MÁGICA (Ahorcado)');
+    if (typeof showMainMenu === 'function') {
+        showMainMenu();
+    } else {
+        window.location.href = 'index.html';
+    }
+}
 function pe_updatePrizes() {
     const list = document.getElementById('pe_prizeList');
     if (!list) return;
