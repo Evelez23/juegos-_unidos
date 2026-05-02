@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quién juega? - Juegos Aurora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B9D;
+            --secondary: #C44569;
+            --accent1: #FFC312;
+            --accent2: #12CBC4;
+            --bg: #1a1a2e;
+            --card: #16213e;
+            --text: #f1f2f6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .bg-animation .bubble {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: float 15s infinite ease-in-out;
+        }
+        .bubble:nth-child(1) { width: 80px; height: 80px; background: #FF6B9D; left: 10%; top: 20%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 120px; height: 120px; background: #12CBC4; left: 70%; top: 60%; animation-delay: 2s; }
+        .bubble:nth-child(3) { width: 60px; height: 60px; background: #FFC312; left: 40%; top: 80%; animation-delay: 4s; }
+        .bubble:nth-child(4) { width: 100px; height: 100px; background: #6C5CE7; left: 80%; top: 10%; animation-delay: 1s; }
+        .bubble:nth-child(5) { width: 70px; height: 70px; background: #00D2D3; left: 20%; top: 70%; animation-delay: 3s; }
+        .bubble:nth-child(6) { width: 90px; height: 90px; background: #FF9F43; left: 55%; top: 30%; animation-delay: 5s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(20px) rotate(240deg); }
+        }
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .star { position: absolute; width: 3px; height: 3px; background: white; border-radius: 50%; animation: twinkle 2s infinite; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+        .container { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; padding: 40px 20px; min-height: 100vh; }
+        .card { background: linear-gradient(135deg, var(--card), #1e2a4a); border-radius: 30px; padding: 30px; border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .title { font-family: 'Fredoka One', cursive; font-size: 2.5rem; text-align: center; background: linear-gradient(90deg, var(--primary), var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 30px; }
+        .users-list { margin-bottom: 30px; max-height: 400px; overflow-y: auto; }
+        .user-card { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.3s; border: 2px solid transparent; }
+        .user-card:hover { background: rgba(255,255,255,0.1); transform: translateX(5px); }
+        .user-card.selected { border-color: var(--accent2); background: rgba(18,203,196,0.1); }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .user-avatar { font-size: 2.5rem; }
+        .user-details h3 { font-family: 'Fredoka One', cursive; margin-bottom: 5px; }
+        .user-details p { color: #aaa; font-size: 0.8rem; }
+        .user-score { text-align: right; }
+        .user-score .total-score { font-family: 'Fredoka One', cursive; font-size: 1.5rem; color: var(--accent1); }
+        .btn-new-user { background: linear-gradient(135deg, var(--accent2), #00D2D3); border: none; color: white; padding: 12px 25px; border-radius: 50px; font-family: 'Fredoka One', cursive; font-size: 1rem; cursor: pointer; width: 100%; margin-bottom: 15px; transition: all 0.3s; }
+        .btn-play { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; color: white; padding: 15px; border-radius: 50px; font-family: 'Fredoka One', cursive; font-size: 1.2rem; cursor: pointer; width: 100%; transition: all 0.3s; }
+        .btn-play:disabled { opacity: 0.5; cursor: not-allowed; }
+        .new-user-form { background: rgba(255,255,255,0.05); border-radius: 20px; padding: 20px; margin-top: 20px; display: none; }
+        .new-user-form.show { display: block; animation: slideDown 0.3s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .avatar-selector { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
+        .avatar-option { cursor: pointer; text-align: center; padding: 10px; border-radius: 20px; transition: all 0.3s; }
+        .avatar-option.selected { background: rgba(255,107,157,0.3); transform: scale(1.1); }
+        .avatar-option .avatar-icon { font-size: 3rem; }
+        .name-input input { width: 100%; padding: 12px; border-radius: 25px; border: 2px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; font-size: 1rem; text-align: center; }
+        .name-input input:focus { outline: none; border-color: var(--accent2); }
+        .btn-create { background: linear-gradient(135deg, #6C5CE7, #B53471); width: 100%; padding: 12px; border: none; border-radius: 25px; color: white; font-weight: bold; cursor: pointer; }
+        .empty-users { text-align: center; padding: 40px; color: #aaa; }
+        .delete-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; opacity: 0.5; transition: opacity 0.3s; margin-left: 10px; }
+        .delete-btn:hover { opacity: 1; }
+        .error-msg { color: #e74c3c; font-size: 0.8rem; text-align: center; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div><div class="bubble"></div></div>
+    <div class="stars" id="stars"></div>
+
+    <div class="container">
+        <div class="card">
+            <h1 class="title">🌟 ¿Quién juega hoy? 🌟</h1>
+            <div class="users-list" id="usersList"></div>
+            <button class="btn-new-user" onclick="toggleNewUserForm()">➕ Nuevo Jugador</button>
+            <div class="new-user-form" id="newUserForm">
+                <div class="avatar-selector">
+                    <div class="avatar-option" data-gender="boy" onclick="selectGender('boy')">
+                        <div class="avatar-icon">👦</div><div>Niño</div>
+                    </div>
+                    <div class="avatar-option" data-gender="girl" onclick="selectGender('girl')">
+                        <div class="avatar-icon">👧</div><div>Niña</div>
+                    </div>
+                </div>
+                <div class="name-input"><input type="text" id="newUserName" placeholder="Escribe tu nombre..." maxlength="20"></div>
+                <button class="btn-create" onclick="createUser()">✨ Crear Aventurero ✨</button>
+                <div id="createError" class="error-msg"></div>
+            </div>
+            <button class="btn-play" id="playBtn" onclick="playAsSelected()" disabled>🎮 ¡Jugar! 🎮</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedUserId = null;
+        let selectedGender = 'boy';
+
+        function createStars() {
+            const container = document.getElementById('stars');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+        }
+        createStars();
+
+        function getAllUsers() {
+            const users = localStorage.getItem('aurora_users');
+            return users ? JSON.parse(users) : [];
+        }
+
+        function saveAllUsers(users) { localStorage.setItem('aurora_users', JSON.stringify(users)); }
+
+        function getUser(userId) { return getAllUsers().find(u => u.id === userId); }
+
+        function saveUser(user) {
+            const users = getAllUsers();
+            const index = users.findIndex(u => u.id === user.id);
+            if (index !== -1) users[index] = user;
+            else users.push(user);
+            saveAllUsers(users);
+        }
+
+        function deleteUser(userId, event) {
+            if (event) event.stopPropagation();
+            if (confirm('¿Seguro que quieres eliminar este jugador? ¡Se perderán todos sus datos!')) {
+                let users = getAllUsers();
+                users = users.filter(u => u.id !== userId);
+                saveAllUsers(users);
+                if (selectedUserId === userId) {
+                    selectedUserId = null;
+                    document.getElementById('playBtn').disabled = true;
+                }
+                renderUsersList();
+            }
+        }
+
+        function createUser() {
+            const name = document.getElementById('newUserName').value.trim();
+            const errorDiv = document.getElementById('createError');
+            if (!name) { errorDiv.textContent = '¡Escribe tu nombre!'; return; }
+            const users = getAllUsers();
+            if (users.some(u => u.name.toLowerCase() === name.toLowerCase())) {
+                errorDiv.textContent = '¡Ya existe un jugador con ese nombre!';
+                return;
+            }
+            const newUser = {
+                id: Date.now().toString(),
+                name: name,
+                gender: selectedGender,
+                avatar: selectedGender === 'boy' ? '👦' : '👧',
+                createdAt: new Date().toISOString(),
+                stats: { totalScore: 0, level: 1, xp: 0, rewards: [],
+                    games: { alfabeto: { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 },
+                             lluvia: { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 },
+                             palabras: { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 },
+                             ahorcado: { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 } }
+                }
+            };
+            saveUser(newUser);
+            document.getElementById('newUserName').value = '';
+            document.getElementById('newUserForm').classList.remove('show');
+            errorDiv.textContent = '';
+            renderUsersList();
+            selectUser(newUser.id);
+        }
+
+        function selectUser(userId) {
+            selectedUserId = userId;
+            renderUsersList();
+            document.getElementById('playBtn').disabled = false;
+            localStorage.setItem('aurora_active_user', userId);
+        }
+
+        function renderUsersList() {
+            const users = getAllUsers();
+            const container = document.getElementById('usersList');
+            if (users.length === 0) {
+                container.innerHTML = '<div class="empty-users">✨ No hay aventureros aún. ¡Crea el primero! ✨</div>';
+                return;
+            }
+            users.sort((a, b) => b.stats.totalScore - a.stats.totalScore);
+            container.innerHTML = users.map(user => `
+                <div class="user-card ${selectedUserId === user.id ? 'selected' : ''}" onclick="selectUser('${user.id}')">
+                    <div class="user-info">
+                        <div class="user-avatar">${user.avatar}</div>
+                        <div class="user-details">
+                            <h3>${escapeHtml(user.name)}</h3>
+                            <p>🎮 ${(user.stats.games.alfabeto.plays + user.stats.games.lluvia.plays + user.stats.games.palabras.plays + user.stats.games.ahorcado.plays)} partidas</p>
+                        </div>
+                    </div>
+                    <div class="user-score">
+                        <div class="total-score">🏆 ${user.stats.totalScore}</div>
+                        <div class="level">Nivel ${user.stats.level}</div>
+                        <button class="delete-btn" onclick="deleteUser('${user.id}', event)">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        function toggleNewUserForm() { document.getElementById('newUserForm').classList.toggle('show'); document.getElementById('newUserName').focus(); }
+        function selectGender(gender) { selectedGender = gender; document.querySelectorAll('.avatar-option').forEach(opt => opt.classList.remove('selected')); document.querySelector(`[data-gender="${gender}"]`).classList.add('selected'); }
+        function playAsSelected() { if (selectedUserId) { localStorage.setItem('aurora_active_user', selectedUserId); window.location.href = 'index.html'; } }
+
+        function loadActiveUser() {
+            const activeUserId = localStorage.getItem('aurora_active_user');
+            if (activeUserId && getUser(activeUserId)) {
+                selectedUserId = activeUserId;
+                document.getElementById('playBtn').disabled = false;
+            }
+            renderUsersList();
+        }
+        loadActiveUser();
+    </script>
+</body>
+</html>
