@@ -321,7 +321,28 @@
             }
             return { score: 0, level: 1, plays: 0, wins: 0, bestScore: 0 };
         }
+<!-- dashboard.html - Ranking y estadísticas -->
+<!-- (similar al anterior pero mostrando TODOS los usuarios) -->
 
+<script>
+function renderRanking() {
+    const users = JSON.parse(localStorage.getItem('aurora_users') || '[]');
+    users.sort((a, b) => b.stats.totalScore - a.stats.totalScore);
+    
+    // Mostrar TOP 10 o todos los usuarios
+    const rankingHTML = users.map((user, index) => `
+        <div class="ranking-item">
+            <div class="rank">#${index + 1}</div>
+            <div class="user-avatar">${user.avatar}</div>
+            <div class="user-name">${user.name}</div>
+            <div class="user-score">🏆 ${user.stats.totalScore}</div>
+            <div class="user-level">Nivel ${user.stats.level}</div>
+        </div>
+    `).join('');
+    
+    document.getElementById('rankingList').innerHTML = rankingHTML || '<p>No hay jugadores aún</p>';
+}
+</script>
         function renderDashboard() {
             const container = document.getElementById('dashboardContainer');
             
