@@ -201,3 +201,52 @@ function ll_endGame() {
     }
     if (gameOver) gameOver.classList.add('show');
 }
+// lluvia.js - Torrente de Palabras
+
+function ll_nextLevel() {
+    if (!ll_state.isPlaying) return;
+    
+    ll_state.level++;
+    ll_updateUI();
+    
+    // Registrar progreso en gameCore
+    const result = gameCore.advanceLluvia(ll_state.level);
+    
+    // Aumentar dificultad
+    ll_state.speed = Math.min(8, 1.8 + (ll_state.level - 1) * 0.5);
+    ll_state.spawnRate = Math.max(400, 1500 - ((ll_state.level - 1) * 100));
+    
+    al_showComboText(window.innerWidth/2, window.innerHeight/2, `⚡ ¡NIVEL ${ll_state.level}! ⚡`);
+    
+    if (result.gameCompleted) {
+        // Mostrar premio y sugerir siguiente juego
+        setTimeout(() => {
+            ll_showGameComplete();
+        }, 500);
+    }
+}
+
+function ll_showGameComplete() {
+    const overlay = document.createElement('div');
+    overlay.className = 'result-overlay';
+    overlay.style.zIndex = '3000';
+    overlay.innerHTML = `
+        <div class="emoji">🌊</div>
+        <h2>¡TORRENTE DOMINADO!</h2>
+        <p class="word-reveal">Has alcanzado el nivel 5</p>
+        <div style="font-size: 3rem; margin: 10px;">🗝️</div>
+        <p>¡Has ganado la LLAVE DE LAS RUINAS!</p>
+        <button class="restart-btn" onclick="ll_goToNextGame()">✨ Ir a Ruinas Antiguas ✨</button>
+    `;
+    document.getElementById('lluvia-app').appendChild(overlay);
+    overlay.classList.add('show');
+}
+
+function ll_goToNextGame() {
+    alert('🎉 ¡Felicidades! Has completado el Torrente de Palabras.\n\n🧩 Ahora puedes jugar RUINAS ANTIGUAS (Palabras Escondidas)');
+    if (typeof showMainMenu === 'function') {
+        showMainMenu();
+    } else {
+        window.location.href = 'index.html';
+    }
+}
