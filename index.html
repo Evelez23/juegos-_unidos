@@ -34,6 +34,101 @@
             <a href="user_manager.html">👥 Todos los Jugadores</a>
             <a href="dashboard.html">🏆 Ranking Global</a>
         </div>
+        <!-- Reemplazar el mapa en index.html -->
+<div class="adv-map" id="advMap">
+    <!-- Zona 1: Bosque de Letras -->
+    <div class="adv-zone" id="zone_alfabeto" onclick="openGameIfUnlocked('alfabeto')">
+        <div class="zone-icon">🌳</div>
+        <div class="zone-name">Bosque de Letras</div>
+        <div class="zone-status" id="status_alfabeto"></div>
+    </div>
+
+    <!-- Zona 2: Torrente de Palabras -->
+    <div class="adv-zone locked" id="zone_lluvia" onclick="openGameIfUnlocked('lluvia')">
+        <div class="zone-icon">☔</div>
+        <div class="zone-name">Torrente de Palabras</div>
+        <div class="zone-lock" id="lock_lluvia">🔒 Completa el Bosque</div>
+    </div>
+
+    <!-- Zona 3: Ruinas Antiguas -->
+    <div class="adv-zone locked" id="zone_palabras" onclick="openGameIfUnlocked('palabras')">
+        <div class="zone-icon">🧩</div>
+        <div class="zone-name">Ruinas Antiguas</div>
+        <div class="zone-lock" id="lock_palabras">🔒 Completa el Torrente</div>
+    </div>
+
+    <!-- Zona 4: Torre Mágica -->
+    <div class="adv-zone locked" id="zone_ahorcado" onclick="openGameIfUnlocked('ahorcado')">
+        <div class="zone-icon">🎪</div>
+        <div class="zone-name">Torre Mágica</div>
+        <div class="zone-lock" id="lock_ahorcado">🔒 Completa las Ruinas</div>
+    </div>
+</div>
+
+<script>
+function updateMapStatus() {
+    if (!gameCore.isLoggedIn()) return;
+    
+    const zones = ['alfabeto', 'lluvia', 'palabras', 'ahorcado'];
+    zones.forEach(zone => {
+        const zoneEl = document.getElementById(`zone_${zone}`);
+        const lockEl = document.getElementById(`lock_${zone}`);
+        const statusEl = document.getElementById(`status_${zone}`);
+        const isUnlocked = gameCore.isGameUnlocked(zone);
+        const stats = gameCore.getGameStats(zone);
+        
+        if (isUnlocked) {
+            zoneEl.classList.remove('locked');
+            zoneEl.classList.add('unlocked');
+            if (lockEl) lockEl.style.display = 'none';
+            if (statusEl) {
+                if (stats.completed) {
+                    statusEl.innerHTML = '✅ COMPLETADO';
+                    statusEl.style.color = '#2ecc71';
+                } else if (zone === 'alfabeto') {
+                    statusEl.innerHTML = `📖 Nivel ${stats.currentLevel} • Fase ${stats.currentPhase}`;
+                } else {
+                    statusEl.innerHTML = `⭐ Nivel ${stats.currentLevel}`;
+                }
+            }
+        } else {
+            zoneEl.classList.add('locked');
+            zoneEl.classList.remove('unlocked');
+            if (lockEl) lockEl.style.display = 'block';
+        }
+    });
+}
+
+function openGameIfUnlocked(gameId) {
+    if (gameCore.isGameUnlocked(gameId)) {
+        openGame(gameId);
+    } else {
+        // Mostrar mensaje de qué necesita hacer
+        let message = '';
+        switch(gameId) {
+            case 'lluvia':
+                message = '🔒 Necesitas completar el NIVEL 3 del Bosque de Letras para desbloquear el Torrente de Palabras.';
+                break;
+            case 'palabras':
+                message = '🔒 Necesitas completar el NIVEL 5 del Torrente de Palabras para desbloquear las Ruinas Antiguas.';
+                break;
+            case 'ahorcado':
+                message = '🔒 Necesitas completar el NIVEL 8 de las Ruinas Antiguas para desbloquear la Torre Mágica.';
+                break;
+        }
+        alert(message);
+    }
+}
+
+// Actualizar mapa cada vez que se carga
+document.addEventListener('DOMContentLoaded', () => {
+    updateMapStatus();
+    
+    // Escuchar eventos de progreso
+    document.addEventListener('adv_levelup', () => updateMapStatus());
+    document.addEventListener('adv_reward', () => updateMapStatus());
+});
+</script>
     </div>
 
     <!-- Contenedores de los juegos -->
