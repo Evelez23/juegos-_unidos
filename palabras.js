@@ -36,7 +36,7 @@ function pe_getWordsFromAhorcado() {
     return pool;
 }
 
-let pe_state = { currentWord: '', letters: [], slots: [], streak: 0 };
+let pe_state = { currentWord: '', letters: [], slots: [], streak: 0, correctCount: 0, level: 1 };
 
 function pe_restartFromLevelOne() {
     if (window.gameCore) {
@@ -48,9 +48,9 @@ function pe_restartFromLevelOne() {
 
 function pe_startGame() {
     if (window.gameCore) {
-        window.gameCore.player.level = Math.max(1, window.gameCore.player.level);
+        
     }
-    pe_state = { currentWord: '', letters: [], slots: [], streak: pe_state.streak || 0 };
+    pe_state = { currentWord: '', letters: [], slots: [], streak: pe_state.streak || 0, correctCount: 0, level: window.gameCore ? (window.gameCore.getGameStats('palabras').currentLevel || 1) : 1 };
     pe_updatePrizes();
     pe_renderCollection();
     pe_nextWord();
