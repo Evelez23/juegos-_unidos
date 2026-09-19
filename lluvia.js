@@ -1,6 +1,6 @@
 // ==================== LLUVIA DE LETRAS ====================
 
-let ll_state = { target: '', isPlaying: false, items: [], speed: 2, spawnRate: 1500, correctCount: 0 };
+let ll_state = { target: '', isPlaying: false, items: [], speed: 2, spawnRate: 1500, correctCount: 0, level: 1 };
 const ll_letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 let ll_gameLoop, ll_spawnTimer;
 
@@ -22,12 +22,13 @@ function ll_startGame() {
         window.gameCore.resetSessionLives(window.gameCore.player.level || 1);
         ll_state = { 
             target: '', isPlaying: true, items: [], 
-            speed: 1.8 + (window.gameCore.player.level - 1) * 0.35, 
-            spawnRate: Math.max(550, 1500 - ((window.gameCore.player.level - 1) * 120)), 
-            correctCount: 0 
+            speed: 1.8 + (window.gameCore.getGameStats('lluvia').currentLevel - 1) * 0.35, 
+            spawnRate: Math.max(550, 1500 - ((window.gameCore.getGameStats('lluvia').currentLevel - 1) * 120)), 
+            correctCount: 0,
+            level: window.gameCore.getGameStats('lluvia').currentLevel || 1 
         };
     } else {
-        ll_state = { target: '', isPlaying: true, items: [], speed: 2, spawnRate: 1500, correctCount: 0 };
+        ll_state = { target: '', isPlaying: true, items: [], speed: 2, spawnRate: 1500, correctCount: 0, level: 1 };
     }
     
     const area = document.getElementById('ll_area');
@@ -77,11 +78,8 @@ function ll_spawnItem() {
     let val = ll_pickAdaptiveLetter();
     const r = Math.random();
     let lives = 3;
-    let level = 1;
-    if (window.gameCore) {
-        lives = window.gameCore.player.lives;
-        level = window.gameCore.player.level;
-    }
+    let level = ll_state.level || 1;
+    if (window.gameCore) lives = window.gameCore.player.lives;
     
     if (r < 0.25) val = ll_state.target;
     else if (r < 0.40 && lives < 5) type = 'heart';
@@ -138,7 +136,7 @@ function ll_handleClick(el, type, val) {
     if (!ll_state.isPlaying) return;
     
     if (type === 'letter' && val === ll_state.target) {
-        const points = 12 + (window.gameCore ? window.gameCore.player.level * 2 : 2);
+        const points = 12 + (ll_state.level * 2);
         if (window.gameCore) {
             window.gameCore.addScore(points, 'lluvia');
             window.gameCore.registerLetterResult(val, true);
@@ -147,12 +145,12 @@ function ll_handleClick(el, type, val) {
         el.remove();
         ll_removeItem(el);
         
-        if (ll_state.correctCount >= 4 && window.gameCore) {
-            window.gameCore.player.level++;
+        if (ll_state.correctCount >= 4) {
             ll_state.correctCount = 0;
+            ll_state.level++;
             ll_state.speed += 0.30;
             ll_state.spawnRate = Math.max(420, ll_state.spawnRate - 100);
-            if (window.gameCore.player.level >= 3) window.gameCore.unlockReward('escudo_lluvia');
+            if (window.gameCore) window.gameCore.advanceLluvia(ll_state.level);
         }
         ll_nextTarget();
     } else if (type === 'letter' && val !== ll_state.target) {
@@ -182,7 +180,7 @@ function ll_updateUI() {
         const levelEl = document.getElementById('ll_level');
         const livesEl = document.getElementById('ll_lives');
         if (scoreEl) scoreEl.textContent = window.gameCore.player.score;
-        if (levelEl) levelEl.textContent = window.gameCore.player.level;
+        if (levelEl) levelEl.textContent = ll_state.level;
         if (livesEl) livesEl.textContent = window.gameCore.player.lives;
         window.gameCore.saveGame();
     }
