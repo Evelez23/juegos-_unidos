@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juegos Aurora - Mundo Mágico</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -14,136 +13,210 @@
     </div>
     <div class="stars" id="global-stars"></div>
 
-    <!-- Barra de Usuario -->
     <div class="user-bar" id="userBar">
         <div class="user-avatar-small" id="userAvatar">👤</div>
         <div class="user-name-small" id="userName">Cargando...</div>
         <div class="user-score-small" id="userScore">🏆 0 pts</div>
         <button class="switch-user-btn" onclick="switchUser()">🔄 Cambiar</button>
-        <a href="dashboard.html">📊 Ranking</a>
     </div>
 
-    <button id="mainBackBtn" class="back-btn" style="display:none;" onclick="showMainMenu()">🏠 Volver al Menú</button>
+    <button id="mainBackBtn" class="back-btn" style="display:none" onclick="showMainMenu()">🏠 Volver al Menú</button>
 
-    <!-- Menú Principal -->
-    <div id="main-menu" class="main-menu">
+    <main id="main-menu" class="main-menu">
         <h1 class="menu-title">Juegos Aurora<br><span>Bilingual School</span></h1>
         <div class="welcome-message" id="welcomeMessage">✨ ¡Bienvenido! Elige un juego ✨</div>
+
         <div class="games-grid" id="gamesGrid"></div>
-        <div class="footer-links">
-            <a href="user_manager.html">👥 Todos los Jugadores</a>
-            <a href="dashboard.html">🏆 Ranking Global</a>
+
+        <div class="adv-map" id="advMap">
+            <div class="adv-zone" id="zone_alfabeto" onclick="openGameIfUnlocked('alfabeto')">
+                <div class="zone-icon">🌳</div>
+                <div class="zone-name">Bosque de Letras</div>
+                <div class="zone-status" id="status_alfabeto"></div>
+            </div>
+            <div class="adv-zone locked" id="zone_lluvia" onclick="openGameIfUnlocked('lluvia')">
+                <div class="zone-icon">☔</div>
+                <div class="zone-name">Torrente de Palabras</div>
+                <div class="zone-lock" id="lock_lluvia">🔒 Completa el Bosque</div>
+                <div class="zone-status" id="status_lluvia"></div>
+            </div>
+            <div class="adv-zone locked" id="zone_palabras" onclick="openGameIfUnlocked('palabras')">
+                <div class="zone-icon">🧩</div>
+                <div class="zone-name">Ruinas Antiguas</div>
+                <div class="zone-lock" id="lock_palabras">🔒 Completa el Torrente</div>
+                <div class="zone-status" id="status_palabras"></div>
+            </div>
+            <div class="adv-zone locked" id="zone_ahorcado" onclick="openGameIfUnlocked('ahorcado')">
+                <div class="zone-icon">🎪</div>
+                <div class="zone-name">Torre Mágica</div>
+                <div class="zone-lock" id="lock_ahorcado">🔒 Completa las Ruinas</div>
+                <div class="zone-status" id="status_ahorcado"></div>
+            </div>
         </div>
-        <!-- Reemplazar el mapa en index.html -->
-<div class="adv-map" id="advMap">
-    <!-- Zona 1: Bosque de Letras -->
-    <div class="adv-zone" id="zone_alfabeto" onclick="openGameIfUnlocked('alfabeto')">
-        <div class="zone-icon">🌳</div>
-        <div class="zone-name">Bosque de Letras</div>
-        <div class="zone-status" id="status_alfabeto"></div>
-    </div>
+    </main>
 
-    <!-- Zona 2: Torrente de Palabras -->
-    <div class="adv-zone locked" id="zone_lluvia" onclick="openGameIfUnlocked('lluvia')">
-        <div class="zone-icon">☔</div>
-        <div class="zone-name">Torrente de Palabras</div>
-        <div class="zone-lock" id="lock_lluvia">🔒 Completa el Bosque</div>
-    </div>
+    <!-- Aventura del Alfabeto -->
+    <section id="alfabeto-app">
+        <div class="start-screen" id="al_startScreen">
+            <div class="mascot">🦄</div>
+            <div class="logo">¡Aventura del Alfabeto!</div>
+            <p style="color:#aaa;font-size:1.1rem;text-align:center;max-width:400px">¡Ayuda al unicornio a encontrar las letras!<br><small>Aurora Bilingual School</small></p>
+            <button class="start-btn" onclick="al_startGame()">¡JUGAR! 🚀</button>
+        </div>
 
-    <!-- Zona 3: Ruinas Antiguas -->
-    <div class="adv-zone locked" id="zone_palabras" onclick="openGameIfUnlocked('palabras')">
-        <div class="zone-icon">🧩</div>
-        <div class="zone-name">Ruinas Antiguas</div>
-        <div class="zone-lock" id="lock_palabras">🔒 Completa el Torrente</div>
-    </div>
+        <div class="game-over" id="al_gameOver">
+            <div class="trophy">🏆</div>
+            <h2 id="al_gameOverTitle">¡Excelente!</h2>
+            <p class="final-score">Puntuación: <span id="al_finalScore">0</span></p>
+            <p class="final-score">Mejor racha: <span id="al_finalStreak">0</span></p>
+            <p class="final-score">Aciertos: <span id="al_finalCorrect">0</span>/<span id="al_finalTotal">0</span></p>
+            <div class="stars-rating" id="al_starsRating">⭐⭐⭐</div>
+            <button class="restart-btn" onclick="al_restartGame()">¡Jugar de Nuevo! 🎮</button>
+        </div>
 
-    <!-- Zona 4: Torre Mágica -->
-    <div class="adv-zone locked" id="zone_ahorcado" onclick="openGameIfUnlocked('ahorcado')">
-        <div class="zone-icon">🎪</div>
-        <div class="zone-name">Torre Mágica</div>
-        <div class="zone-lock" id="lock_ahorcado">🔒 Completa las Ruinas</div>
-    </div>
-</div>
+        <div class="game-container" id="al_gameContainer" style="display:none">
+            <div class="header"><h1>🌈 Aventura del Alfabeto</h1><p class="subtitle">Aurora Bilingual School</p></div>
+            <div class="score-board">
+                <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="al_score">0</div></div></div>
+                <div class="score-item"><span class="icon">🔥</span><div><div class="label">Racha</div><div class="value" id="al_streak">0</div></div></div>
+                <div class="score-item"><span class="icon">❤️</span><div><div class="label">Vidas</div><div class="value" id="al_lives">3</div></div></div>
+                <div class="score-item"><span class="icon">🎯</span><div><div class="label">Nivel</div><div class="value" id="al_level">1</div></div></div>
+            </div>
+            <div class="lang-selector">
+                <div class="selector-label">🗣️ Idioma de la Voz</div>
+                <button class="lang-btn active" data-lang="es" onclick="al_setLanguage('es')">🇪🇸 Español</button>
+                <button class="lang-btn" data-lang="en" onclick="al_setLanguage('en')">🇺🇸 Inglés</button>
+                <button class="lang-btn" data-lang="both" onclick="al_setLanguage('both')">🌎 Ambos</button>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar"><div class="progress-fill" id="al_progressFill" style="width:0%"></div></div>
+                <div class="progress-text" id="al_progressText">Letras: 0/10</div>
+            </div>
+            <div class="game-area">
+                <div class="target-display" id="al_targetDisplay">
+                    <button class="speak-btn" id="al_speakBtn" onclick="al_speakLetter()" title="Escuchar de nuevo">🔊</button>
+                    <div class="instruction" id="al_instruction">¡Encuentra la letra!</div>
+                    <div class="target-letter" id="al_targetLetter">A</div>
+                    <div class="timer-bar"><div class="timer-fill" id="al_timerFill" style="width:100%"></div></div>
+                </div>
+                <div class="letter-grid" id="al_letterGrid"></div>
+            </div>
+        </div>
+    </section>
 
-<script>
-function updateMapStatus() {
-    if (!gameCore.isLoggedIn()) return;
-    
-    const zones = ['alfabeto', 'lluvia', 'palabras', 'ahorcado'];
-    zones.forEach(zone => {
-        const zoneEl = document.getElementById(`zone_${zone}`);
-        const lockEl = document.getElementById(`lock_${zone}`);
-        const statusEl = document.getElementById(`status_${zone}`);
-        const isUnlocked = gameCore.isGameUnlocked(zone);
-        const stats = gameCore.getGameStats(zone);
-        
-        if (isUnlocked) {
-            zoneEl.classList.remove('locked');
-            zoneEl.classList.add('unlocked');
-            if (lockEl) lockEl.style.display = 'none';
-            if (statusEl) {
-                if (stats.completed) {
-                    statusEl.innerHTML = '✅ COMPLETADO';
-                    statusEl.style.color = '#2ecc71';
-                } else if (zone === 'alfabeto') {
-                    statusEl.innerHTML = `📖 Nivel ${stats.currentLevel} • Fase ${stats.currentPhase}`;
-                } else {
-                    statusEl.innerHTML = `⭐ Nivel ${stats.currentLevel}`;
-                }
-            }
-        } else {
-            zoneEl.classList.add('locked');
-            zoneEl.classList.remove('unlocked');
-            if (lockEl) lockEl.style.display = 'block';
-        }
-    });
-}
+    <!-- Lluvia de Letras -->
+    <section id="lluvia-app">
+        <div class="game-container">
+            <div class="header"><h1>☔ Lluvia de Letras</h1><p class="subtitle">Atrapa la letra correcta</p></div>
+            <div class="score-board">
+                <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="ll_score">0</div></div></div>
+                <div class="score-item"><span class="icon">❤️</span><div><div class="label">Vidas</div><div class="value" id="ll_lives">3</div></div></div>
+                <div class="score-item"><span class="icon">🎯</span><div><div class="label">Nivel</div><div class="value" id="ll_level">1</div></div></div>
+            </div>
+            <div class="ll-target-display">Atrapa la letra: <span id="ll_targetLetter" style="font-size:3rem">A</span></div>
+            <div class="ll-area" id="ll_area"></div>
+        </div>
+        <div class="game-over" id="ll_gameOver">
+            <div class="trophy">☔</div><h2>¡Juego Terminado!</h2>
+            <p class="final-score">Puntuación: <span id="ll_finalScore">0</span></p>
+            <p class="final-score">Nivel alcanzado: <span id="ll_finalLevel">1</span></p>
+            <button class="restart-btn" onclick="ll_startGame()">¡Jugar de Nuevo! 🎮</button>
+        </div>
+    </section>
 
-function openGameIfUnlocked(gameId) {
-    if (gameCore.isGameUnlocked(gameId)) {
-        openGame(gameId);
-    } else {
-        // Mostrar mensaje de qué necesita hacer
-        let message = '';
-        switch(gameId) {
-            case 'lluvia':
-                message = '🔒 Necesitas completar el NIVEL 3 del Bosque de Letras para desbloquear el Torrente de Palabras.';
-                break;
-            case 'palabras':
-                message = '🔒 Necesitas completar el NIVEL 5 del Torrente de Palabras para desbloquear las Ruinas Antiguas.';
-                break;
-            case 'ahorcado':
-                message = '🔒 Necesitas completar el NIVEL 8 de las Ruinas Antiguas para desbloquear la Torre Mágica.';
-                break;
-        }
-        alert(message);
-    }
-}
+    <!-- Palabras Escondidas -->
+    <section id="palabras-app">
+        <div class="game-container">
+            <div class="header"><h1>🧩 Palabras Escondidas</h1><p class="subtitle">Ordena las letras</p></div>
+            <div class="score-board">
+                <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="pe_score">0</div></div></div>
+                <div class="score-item"><span class="icon">🎯</span><div><div class="label">Nivel</div><div class="value" id="pe_level">1</div></div></div>
+            </div>
+            <div class="game-area">
+                <div class="word-display">
+                    <div class="hint" id="pe_hint" style="font-size:4rem">🔤</div>
+                    <div class="pe-word-area" id="pe_wordSlots"></div>
+                </div>
+                <div class="pe-letters-area" id="pe_lettersArea"></div>
+            </div>
+            <div class="pe-prizes"><h3>Colección de Premios Mágicos 🎁</h3><div class="pe-prize-list" id="pe_prizeList"></div></div>
+            <div class="collection-panel"><h3 id="pe_collectionTitle">Colección de Recompensas</h3><div class="collection-grid" id="pe_collectionGrid"></div></div>
+        </div>
+        <div class="result-overlay" id="pe_winOverlay">
+            <div class="emoji">🎉</div><h2>¡EXCELENTE!</h2>
+            <p class="word-reveal" id="pe_prizeMsg" style="display:none">¡Ganaste!</p>
+            <button class="restart-btn" onclick="pe_nextWord()">Siguiente Palabra 🚀</button>
+        </div>
+    </section>
 
-// Actualizar mapa cada vez que se carga
-document.addEventListener('DOMContentLoaded', () => {
-    updateMapStatus();
-    
-    // Escuchar eventos de progreso
-    document.addEventListener('adv_levelup', () => updateMapStatus());
-    document.addEventListener('adv_reward', () => updateMapStatus());
-});
-</script>
-    </div>
+    <!-- Ahorcado -->
+    <section id="ahorcado-app">
+        <div class="result-overlay" id="ah_winOverlay"><div class="emoji">🎉</div><h2>¡GANASTE!</h2><p class="word-reveal">La palabra era: <span id="ah_winWord"></span></p><button class="restart-btn" onclick="ah_nextWord()">¡Siguiente palabra! 🚀</button></div>
+        <div class="result-overlay" id="ah_loseOverlay"><div class="emoji">😢</div><h2>¡Ups!</h2><p class="word-reveal">La palabra era: <span id="ah_loseWord"></span></p><button class="restart-btn" onclick="ah_nextWord()">¡Intentar otra! 💪</button></div>
+        <div class="game-container">
+            <div class="header"><h1>🎪 Ahorcado Mágico</h1><p class="subtitle">Aurora Bilingual School</p></div>
+            <div class="score-board">
+                <div class="score-item"><span class="icon">⭐</span><div><div class="label">Puntos</div><div class="value" id="ah_score">0</div></div></div>
+                <div class="score-item"><span class="icon">🏆</span><div><div class="label">Ganadas</div><div class="value" id="ah_wins">0</div></div></div>
+                <div class="score-item"><span class="icon">🎯</span><div><div class="label">Palabras</div><div class="value" id="ah_wordsCount">0</div></div></div>
+            </div>
+            <div class="lang-selector">
+                <button class="lang-btn active" data-lang="es" onclick="ah_setLanguage('es')">🇪🇸 Español</button>
+                <button class="lang-btn" data-lang="en" onclick="ah_setLanguage('en')">🇺🇸 English</button>
+            </div>
+            <div class="category-selector" id="ah_categorySelector">
+                <button class="category-btn active" data-cat="animals" onclick="ah_setCategory('animals')">🐱 Animales</button>
+                <button class="category-btn" data-cat="family" onclick="ah_setCategory('family')">👨‍👩‍👧 Familia</button>
+                <button class="category-btn" data-cat="colors" onclick="ah_setCategory('colors')">🎨 Colores</button>
+                <button class="category-btn" data-cat="food" onclick="ah_setCategory('food')">🍎 Comida</button>
+                <button class="category-btn" data-cat="objects" onclick="ah_setCategory('objects')">🏠 Casa</button>
+                <button class="category-btn" data-cat="mixed" onclick="ah_setCategory('mixed')">🎲 Mixto</button>
+            </div>
+            <div class="game-area">
+                <div class="word-display"><div class="hint" id="ah_hint"><span class="emoji" id="ah_hintEmoji">🐱</span><span id="ah_hintText">Animal</span></div><div class="word-slots" id="ah_wordSlots"></div></div>
+                <div class="hangman-area"><div class="hangman-drawing" id="ah_hangmanDrawing">
+                    <div class="hangman-part part-base" id="ah_part0"></div><div class="hangman-part part-pole" id="ah_part1"></div><div class="hangman-part part-top" id="ah_part2"></div><div class="hangman-part part-rope" id="ah_part3"></div>
+                    <div class="hangman-part part-head" id="ah_part4"><div class="mouth"></div></div><div class="hangman-part part-body" id="ah_part5"></div><div class="hangman-part part-arm-left" id="ah_part6"></div><div class="hangman-part part-arm-right" id="ah_part7"></div><div class="hangman-part part-leg-left" id="ah_part8"></div><div class="hangman-part part-leg-right" id="ah_part9"></div>
+                </div></div>
+                <div class="lives-display"><div class="hearts" id="ah_hearts">❤️❤️❤️</div><div class="lives-text" id="ah_livesText">10 intentos restantes</div></div>
+                <div class="keyboard" id="ah_keyboard"></div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Contenedores de los juegos -->
-    <div id="ahorcado-app"></div>
-    <div id="alfabeto-app"></div>
-    <div id="lluvia-app"></div>
-    <div id="palabras-app"></div>
-
-    <!-- Scripts -->
     <script src="./gameCore.js"></script>
+    <script src="./i18n.js"></script>
     <script src="./ui.js"></script>
     <script src="./ahorcado.js"></script>
     <script src="./aventura_alfabeto.js"></script>
     <script src="./lluvia.js"></script>
     <script src="./palabras.js"></script>
-    <script src="./main.js"></script>
+    <script>
+    function updateMapStatus() {
+        if (!window.gameCore || !gameCore.isLoggedIn()) return;
+        ['alfabeto','lluvia','palabras','ahorcado'].forEach(zone => {
+            const zoneEl=document.getElementById('zone_'+zone);
+            const lockEl=document.getElementById('lock_'+zone);
+            const statusEl=document.getElementById('status_'+zone);
+            const unlocked=gameCore.isGameUnlocked(zone);
+            const stats=gameCore.getGameStats(zone);
+            if(unlocked){
+                zoneEl.classList.remove('locked'); zoneEl.classList.add('unlocked');
+                if(lockEl) lockEl.style.display='none';
+                if(statusEl) statusEl.textContent=stats.completed?'✅ COMPLETADO':'⭐ Nivel '+stats.currentLevel;
+            } else {
+                zoneEl.classList.add('locked'); zoneEl.classList.remove('unlocked');
+                if(lockEl) lockEl.style.display='block';
+            }
+        });
+    }
+    function openGameIfUnlocked(gameId) {
+        if (gameCore && gameCore.isGameUnlocked(gameId)) openGame(gameId);
+        else alert('🔒 Esta zona todavía está bloqueada. Completa la etapa anterior para desbloquearla.');
+    }
+    document.addEventListener('adv_levelup', updateMapStatus);
+    document.addEventListener('adv_reward', updateMapStatus);
+    document.addEventListener('DOMContentLoaded', updateMapStatus);
+    </script>
 </body>
 </html>
