@@ -329,6 +329,11 @@ function ah_getRandomWord() {
 
 function ah_nextWord() {
     ah_initAudio();
+    if (window.gameCore) {
+        const stats = window.gameCore.getGameStats('ahorcado');
+        ah_gameState.score = stats.score || 0;
+        ah_gameState.wins = stats.wins || 0;
+    }
 
     const winOverlay = document.getElementById('ah_winOverlay');
     const loseOverlay = document.getElementById('ah_loseOverlay');
