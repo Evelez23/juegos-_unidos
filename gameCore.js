@@ -369,6 +369,17 @@
             this.saveGame();
         }
 
+
+        // Compatibilidad con juegos que usan la API antigua.
+        updateGameStats(gameId, points = 0, wordsPlayed = 0, win = false) {
+            if (!this.player || !this.player.gameStats[gameId]) return;
+            if (points) this.addScore(points, gameId);
+            const stats = this.player.gameStats[gameId];
+            stats.plays = Math.max(stats.plays || 0, wordsPlayed || 0);
+            if (win) stats.wins = (stats.wins || 0) + 1;
+            this.saveGame();
+        }
+
         setLanguage(lang) {
             this.settings.language = lang;
             this.saveGame();
