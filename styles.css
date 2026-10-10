@@ -140,3 +140,63 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100
     .letter-card { font-size: 1.5rem; }
     .target-letter { font-size: 3rem; }
 }
+
+
+/* Aventura del Alfabeto: jerarquía visual y lectura móvil */
+#alfabeto-app #al_gameContainer {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 40px);
+}
+#alfabeto-app #al_gameContainer > .header { order: 0; }
+#alfabeto-app #al_gameContainer > .score-board {
+    order: 1;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 0 12px;
+}
+#alfabeto-app #al_gameContainer > .lang-selector { order: 2; margin-bottom: 10px; }
+#alfabeto-app #al_gameContainer > .progress-container { order: 3; margin: 8px 0 12px; }
+#alfabeto-app #al_gameContainer > .game-area {
+    order: 4;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+#alfabeto-app .target-display { padding: 16px; }
+#alfabeto-app .target-letter,
+#alfabeto-app .letter-card,
+#alfabeto-app .score-item .value {
+    font-family: 'Fredoka One', 'Trebuchet MS', Arial, sans-serif;
+    font-style: normal;
+}
+#alfabeto-app .target-letter { font-size: clamp(4rem, 9vw, 6rem); line-height: 1.1; }
+#alfabeto-app .letter-grid { grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); }
+#alfabeto-app .letter-card { font-size: clamp(1.8rem, 3vw, 2.5rem); }
+
+@media (max-width: 600px) {
+    #alfabeto-app { padding: 10px; }
+    #alfabeto-app #al_gameContainer { min-height: calc(100svh - 20px); }
+    #alfabeto-app #al_gameContainer > .header { margin-bottom: 8px; }
+    #alfabeto-app #al_gameContainer > .header h1 { font-size: 1.55rem; line-height: 1.2; }
+    #alfabeto-app #al_gameContainer > .header .subtitle { font-size: 0.85rem; }
+    #alfabeto-app #al_gameContainer > .score-board { gap: 6px; margin-bottom: 8px; }
+    #alfabeto-app .score-item { padding: 7px 9px; gap: 6px; border-radius: 12px; }
+    #alfabeto-app .score-item .icon { font-size: 1.1rem; }
+    #alfabeto-app .score-item .label { font-size: 0.62rem; }
+    #alfabeto-app .score-item .value { font-size: 1.05rem; }
+    #alfabeto-app .lang-selector { gap: 6px; margin-bottom: 6px; }
+    #alfabeto-app .lang-selector .selector-label { width: 100%; text-align: center; font-size: 0.8rem; }
+    #alfabeto-app .lang-btn { padding: 7px 10px; font-size: 0.8rem; }
+    #alfabeto-app #al_gameContainer > .progress-container { margin: 5px 0 8px; }
+    #alfabeto-app .progress-text { font-size: 0.8rem; }
+    #alfabeto-app .target-display { padding: 12px; margin-bottom: 0; }
+    #alfabeto-app .target-letter { font-size: clamp(4rem, 18vw, 5.25rem); }
+    #alfabeto-app .letter-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    #alfabeto-app .letter-card { font-size: 1.8rem; border-radius: 12px; min-width: 0; }
+}
