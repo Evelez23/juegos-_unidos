@@ -200,3 +200,31 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100
     #alfabeto-app .letter-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
     #alfabeto-app .letter-card { font-size: 1.8rem; border-radius: 12px; min-width: 0; }
 }
+
+
+/* Palabras Escondidas: retroalimentación clara */
+#palabras-app .pe-slot.error {
+    border-color: #ff5b68;
+    background: rgba(231, 76, 60, 0.28);
+    box-shadow: 0 0 0 2px rgba(255, 91, 104, 0.25);
+    animation: pe-shake 0.22s ease-in-out 2;
+}
+#palabras-app .pe-feedback {
+    min-height: 1.5em;
+    margin: 12px auto 18px;
+    text-align: center;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.4;
+}
+#palabras-app .pe-feedback.error { color: #ff7b84; }
+#palabras-app .pe-feedback.success { color: #62e6a4; }
+@keyframes pe-shake {
+    0%, 100% { transform: translateX(0); }
+    35% { transform: translateX(-3px); }
+    70% { transform: translateX(3px); }
+}
+@media (max-width: 600px) {
+    #palabras-app .pe-feedback { font-size: 1rem; margin: 8px auto 14px; }
+}
