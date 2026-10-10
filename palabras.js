@@ -1,42 +1,20 @@
 // ==================== PALABRAS ESCONDIDAS ====================
 
-// Usar las mismas palabras del ahorcado
+// Diccionario progresivo por nivel.
+const PE_WORDS = [
+{word:'OSO',emoji:'🐻',level:1},{word:'SOL',emoji:'☀️',level:1},{word:'PAN',emoji:'🍞',level:1},{word:'PEZ',emoji:'🐟',level:1},{word:'GATO',emoji:'🐱',level:1},{word:'VACA',emoji:'🐮',level:1},{word:'MESA',emoji:'🪑',level:1},{word:'CASA',emoji:'🏠',level:1},{word:'MAMA',emoji:'👩',level:1},{word:'PAPA',emoji:'👨',level:1},{word:'LEON',emoji:'🦁',level:1},{word:'PATO',emoji:'🦆',level:1},{word:'MANO',emoji:'✋',level:1},{word:'LUNA',emoji:'🌙',level:1},{word:'DEDO',emoji:'☝️',level:1},{word:'BOTA',emoji:'🥾',level:1},{word:'ROSA',emoji:'🌹',level:1},{word:'UVA',emoji:'🍇',level:1},{word:'NENE',emoji:'👶',level:1},{word:'PERRO',emoji:'🐶',level:1},{word:'NINO',emoji:'🧒',level:1},{word:'GALLETA',emoji:'🍪',level:1},
+{word:'ARBOL',emoji:'🌳',level:2},{word:'ABUELA',emoji:'👵',level:2},{word:'ABUELO',emoji:'👴',level:2},{word:'HERMANO',emoji:'👦',level:2},{word:'GALLINA',emoji:'🐔',level:2},{word:'CONEJO',emoji:'🐰',level:2},{word:'CABALLO',emoji:'🐴',level:2},{word:'HELADO',emoji:'🍦',level:2},{word:'QUESO',emoji:'🧀',level:2},{word:'PIZZA',emoji:'🍕',level:2},{word:'PELOTA',emoji:'⚽',level:2},{word:'ZAPATO',emoji:'👟',level:2},{word:'CAMISA',emoji:'👕',level:2},{word:'VENTANA',emoji:'🪟',level:2},{word:'CUADRADO',emoji:'🟦',level:2},{word:'CALCETIN',emoji:'🧦',level:2},{word:'MARIPOSA',emoji:'🦋',level:2},{word:'ESCUELA',emoji:'🏫',level:2},{word:'MOCHILA',emoji:'🎒',level:2},{word:'TORTUGA',emoji:'🐢',level:2},
+{word:'ELEFANTE',emoji:'🐘',level:3},{word:'SERPIENTE',emoji:'🐍',level:3},{word:'TELEVISION',emoji:'📺',level:3},{word:'DINOSAURIO',emoji:'🦕',level:3},{word:'CHOCOLATE',emoji:'🍫',level:3},{word:'MARINERO',emoji:'⚓',level:3},{word:'ZANAHORIA',emoji:'🥕',level:3},{word:'COCODRILO',emoji:'🐊',level:3},{word:'BICICLETA',emoji:'🚲',level:3},{word:'CUMPLEANOS',emoji:'🎂',level:3},{word:'HERMANITA',emoji:'👧',level:3},{word:'UNIVERSO',emoji:'🌌',level:3},{word:'CAMIONETA',emoji:'🚙',level:3},{word:'ARCOIRIS',emoji:'🌈',level:3},
+{word:'MARIPOSITA',emoji:'🦋',level:4},{word:'COMPUTADORA',emoji:'💻',level:4},{word:'HIPOPOTAMO',emoji:'🦛',level:4},{word:'REFRIGERADOR',emoji:'🧊',level:4},{word:'BOMBERO',emoji:'🚒',level:4},{word:'BIBLIOTECA',emoji:'📚',level:4},{word:'CUMPLEANERO',emoji:'🎉',level:4},{word:'FERROCARRIL',emoji:'🚂',level:4},{word:'ABRACADABRA',emoji:'✨',level:4},{word:'ESPANTAPAJAROS',emoji:'🎃',level:4},
+{word:'CONSTELACION',emoji:'🌠',level:5},{word:'HELICOPTERO',emoji:'🚁',level:5},{word:'AVENTURERO',emoji:'🧭',level:5},{word:'MARAVILLOSO',emoji:'⭐',level:5},{word:'BOSQUECITO',emoji:'🌲',level:5},{word:'ASTRONAUTA',emoji:'👨‍🚀',level:5},{word:'PIRULETERO',emoji:'🍭',level:5},
+{word:'TRANSPORTADOR',emoji:'🚚',level:6},{word:'EXPLORADORA',emoji:'🧭',level:6},{word:'ESTRELLITAS',emoji:'✨',level:6},{word:'ROMPECABEZAS',emoji:'🧩',level:6},
+{word:'EXTRAORDINARIO',emoji:'🌟',level:7},{word:'ELECTRODOMESTICO',emoji:'🔌',level:7},{word:'RESPONSABILIDAD',emoji:'🏅',level:7},{word:'IMAGINACION',emoji:'💭',level:7},
+{word:'SUPERCALIFRAGILISTICO',emoji:'🪄',level:8},{word:'INDEPENDIENTEMENTE',emoji:'🚀',level:8}
+];
 function pe_getWordsFromAhorcado() {
-    const lang = 'es';
-    const pool = [];
-    const wordsDB = {
-        animals: { es: [
-            { word: 'GATO', emoji: '🐱' }, { word: 'PERRO', emoji: '🐶' }, { word: 'PEZ', emoji: '🐟' },
-            { word: 'PAJARO', emoji: '🐦' }, { word: 'OSO', emoji: '🐻' }, { word: 'LEON', emoji: '🦁' },
-            { word: 'CONEJO', emoji: '🐰' }, { word: 'ELEFANTE', emoji: '🐘' }, { word: 'VACA', emoji: '🐮' }
-        ]},
-        family: { es: [
-            { word: 'MAMA', emoji: '👩' }, { word: 'PAPA', emoji: '👨' }, { word: 'BEBE', emoji: '👶' },
-            { word: 'HERMANO', emoji: '👦' }, { word: 'HERMANA', emoji: '👧' }, { word: 'ABUELA', emoji: '👵' },
-            { word: 'ABUELO', emoji: '👴' }, { word: 'TIO', emoji: '🧔' }, { word: 'TIA', emoji: '👩' }
-        ]},
-        colors: { es: [
-            { word: 'ROJO', emoji: '🔴' }, { word: 'AZUL', emoji: '🔵' }, { word: 'VERDE', emoji: '🟢' },
-            { word: 'AMARILLO', emoji: '🟡' }, { word: 'ROSA', emoji: '🩷' }, { word: 'MORADO', emoji: '🟣' }
-        ]},
-        food: { es: [
-            { word: 'MANZANA', emoji: '🍎' }, { word: 'LECHE', emoji: '🥛' }, { word: 'PAN', emoji: '🍞' },
-            { word: 'AGUA', emoji: '💧' }, { word: 'HUEVO', emoji: '🥚' }, { word: 'QUESO', emoji: '🧀' },
-            { word: 'PIZZA', emoji: '🍕' }, { word: 'HELADO', emoji: '🍦' }
-        ]}
-    };
-    
-    Object.keys(wordsDB).forEach(category => {
-        const entries = (wordsDB[category] && wordsDB[category][lang]) || [];
-        entries.forEach(entry => {
-            const clean = String(entry.word || '').toUpperCase();
-            if (clean) pool.push({ w: clean.replace(/\s/g, ''), e: entry.emoji || '🔤' });
-        });
-    });
-    return pool;
+ return PE_WORDS.map(item => ({w:item.word.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/Ñ/g,'N'),e:item.emoji,level:item.level}));
 }
-
-let pe_state = { currentWord: '', letters: [], slots: [], streak: 0, correctCount: 0, level: 1 };
+let pe_state = { currentWord: '', letters: [], slots: [], streak: 0, correctCount: 0, level: 1, recentWords: [] };
 
 function pe_restartFromLevelOne() {
     if (window.gameCore) {
@@ -50,7 +28,7 @@ function pe_startGame() {
     if (window.gameCore) {
         
     }
-    pe_state = { currentWord: '', letters: [], slots: [], streak: pe_state.streak || 0, correctCount: 0, level: window.gameCore ? (window.gameCore.getGameStats('palabras').currentLevel || 1) : 1 };
+    pe_state = { currentWord: '', letters: [], slots: [], streak: pe_state.streak || 0, correctCount: 0, level: window.gameCore ? (window.gameCore.getGameStats('palabras').currentLevel || 1) : 1, recentWords: pe_state.recentWords || [] };
     pe_updatePrizes();
     pe_renderCollection();
     pe_nextWord();
@@ -64,13 +42,20 @@ function pe_nextWord() {
     pe_showFeedback('', '');
     
     const sourceAll = pe_getWordsFromAhorcado();
-    let allowed = sourceAll;
+    const level = Math.max(1, Math.min(8, pe_state.level || 1));
+    let allowed = sourceAll.filter(obj => obj.level === level);
+    if (!allowed.length) allowed = sourceAll.filter(obj => obj.level <= level);
     if (window.gameCore) {
-        allowed = sourceAll.filter(obj => window.gameCore.canUseWord(obj.w));
+        const practiced = allowed.filter(obj => window.gameCore.canUseWord(obj.w));
+        if (practiced.length) allowed = practiced;
     }
-    const source = allowed.length ? allowed : sourceAll;
-    const wordObj = source[Math.floor(Math.random() * source.length)];
+    const recent = new Set(pe_state.recentWords || []);
+    let fresh = allowed.filter(obj => !recent.has(obj.w));
+    if (!fresh.length) { pe_state.recentWords = []; fresh = allowed; }
+    const wordObj = fresh[Math.floor(Math.random() * fresh.length)];
     pe_state.currentWord = wordObj.w;
+    pe_state.recentWords.push(wordObj.w);
+    if (pe_state.recentWords.length > 12) pe_state.recentWords.shift();
     
     const hint = document.getElementById('pe_hint');
     if (hint) hint.textContent = wordObj.e;
@@ -121,9 +106,10 @@ function pe_render() {
     const scoreEl = document.getElementById('pe_score');
     const levelEl = document.getElementById('pe_level');
     if (window.gameCore) {
-        if (scoreEl) scoreEl.textContent = window.gameCore.player.score;
-        if (levelEl) levelEl.textContent = window.gameCore.player.level;
-    }
+        const stats = window.gameCore.getGameStats('palabras');
+        if (scoreEl) scoreEl.textContent = stats.score || 0;
+        if (levelEl) levelEl.textContent = stats.currentLevel || pe_state.level || 1;
+    } else if (levelEl) levelEl.textContent = pe_state.level || 1;
 }
 
 function pe_letterClick(idx) {
@@ -159,6 +145,23 @@ function pe_slotClick(idx) {
 }
 
 
+function pe_playVictorySound() {
+    try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        const ctx = new AC(), start = ctx.currentTime;
+        [523.25,659.25,783.99,1046.5].forEach((hz,i) => {
+            const osc=ctx.createOscillator(), gain=ctx.createGain(), t=start+i*0.10;
+            osc.type='sine'; osc.frequency.value=hz;
+            gain.gain.setValueAtTime(0.0001,t);
+            gain.gain.exponentialRampToValueAtTime(0.13,t+0.025);
+            gain.gain.exponentialRampToValueAtTime(0.0001,t+0.18);
+            osc.connect(gain); gain.connect(ctx.destination); osc.start(t); osc.stop(t+0.2);
+        });
+        setTimeout(()=>ctx.close(),850);
+    } catch(e) {}
+}
+
 // Mensaje visible y accesible para indicar si la selección es correcta.
 function pe_showFeedback(message, type) {
     const slots = document.getElementById('pe_wordSlots');
@@ -188,20 +191,14 @@ function pe_checkWin() {
             
             pe_state.correctCount++;
             pe_state.streak++;
-            
-            // Cada 5 palabras correctas = subir de nivel
-            if (pe_state.correctCount >= 5) {
+            pe_playVictorySound();
+            // Cada 5 aciertos avanza un nivel, hasta completar el nivel 8.
+            if (pe_state.correctCount >= 5 && pe_state.level < 8) {
                 pe_state.level++;
                 pe_state.correctCount = 0;
-                
-                // Registrar progreso en gameCore
                 const result = gameCore.advancePalabras(pe_state.level);
-                
-                pe_showFeedback('📜 ¡Subiste al nivel ' + pe_state.level + '!', 'success');
-                
-                if (result.gameCompleted) {
-                    setTimeout(() => pe_showGameComplete(), 500);
-                }
+                pe_showFeedback('🎉 ¡Subiste al nivel ' + pe_state.level + '! ¡Nuevas palabras te esperan!', 'success');
+                if (result.gameCompleted) setTimeout(() => pe_showGameComplete(), 700);
             }
             
             pe_updatePrizes();
