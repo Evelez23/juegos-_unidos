@@ -197,7 +197,7 @@ function pe_checkWin() {
                 // Registrar progreso en gameCore
                 const result = gameCore.advancePalabras(pe_state.level);
                 
-                al_showComboText(window.innerWidth/2, window.innerHeight/2, `📜 ¡NIVEL ${pe_state.level}! 📜`);
+                pe_showFeedback('📜 ¡Subiste al nivel ' + pe_state.level + '!', 'success');
                 
                 if (result.gameCompleted) {
                     setTimeout(() => pe_showGameComplete(), 500);
