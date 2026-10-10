@@ -336,7 +336,7 @@ function al_nextRound() {
         // Registrar el cierre del nivel y consultar si Aventura terminó.
         let gameCompleted = false;
         if (window.gameCore) {
-            const result = window.gameCore.advanceAlfabeto(al_gameState.correctAnswers, al_gameState.totalRounds);
+            const result = window.gameCore.advanceAlfabeto(al_gameState.correctAnswers, al_gameState.totalRounds, 2);
             gameCompleted = Boolean(result.gameCompleted);
 
             if (result.levelUp) {
@@ -647,7 +647,7 @@ function al_showLevelCompleteOverlay(completedLevel, gameCompleted = false) {
 
     if (!levelPassed) {
         title = '💪 ¡Vamos a intentarlo otra vez!';
-        message = 'Necesitamos 10 respuestas correctas para avanzar. ¡Tú puedes!';
+        message = 'Necesitamos al menos 8 respuestas correctas de 10 para avanzar. ¡Puedes equivocarte hasta 2 veces!';
         buttonText = 'Repetir nivel 🔁';
         buttonAction = 'al_retryCurrentLevel()';
     }
