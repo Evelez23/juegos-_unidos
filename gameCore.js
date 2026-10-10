@@ -161,8 +161,10 @@
             
             const newUnlocked = ['alfabeto'];
             
-            // Verificar si alfabeto está completado (nivel 3 alcanzado)
-            if (this.player.gameStats.alfabeto.maxLevelReached >= 3) {
+            // Aventura del Alfabeto se completa al terminar el nivel 4 (Dictado).
+            // Se conserva el desbloqueo de perfiles antiguos que ya estaban marcados como completados.
+            const alfabetoStats = this.player.gameStats.alfabeto;
+            if (alfabetoStats.completed || alfabetoStats.maxLevelReached >= 4) {
                 newUnlocked.push('lluvia');
             }
             
@@ -235,38 +237,59 @@
             return this.player.gameStats[gameId]?.completed || false;
         }
         
-        // Registrar progreso en Alfabeto (tiene fases)
-        advanceAlfabeto(correctCount, totalLevels = 10) {
-            if (!this.player) return { levelUp: false, phaseUp: false, gameCompleted: false };
-            
-            const stats = this.player.gameStats.alfabeto;
-            
-            // Si ya completó 10 letras en el nivel actual
-            if (correctCount >= totalLevels) {
-                // Subir de nivel dentro del juego
-                stats.currentLevel++;
-                stats.maxLevelReached = Math.max(stats.maxLevelReached, stats.currentLevel);
-                
-                // Cada 3 niveles, subir de fase (1→2→3)
-                let phaseUp = false;
-                if (stats.currentLevel % 3 === 0 && stats.currentPhase < 3) {
-                    stats.currentPhase++;
-                    phaseUp = true;
-                }
-                
-                // Si llegó a nivel 3 (fase 3 completada), el juego está listo para dar premio
-                let gameCompleted = false;
-                if (stats.currentLevel >= 3 && !stats.completed) {
-                    stats.completed = true;
-                    gameCompleted = true;
-                    this.unlockReward('llave_lluvia');
-                }
-                
-                this.saveGame();
-                return { levelUp: true, phaseUp, gameCompleted, newLevel: stats.currentLevel, newPhase: stats.currentPhase };
+        // Registrar progreso en Aventura del Alfabeto.
+        // correctCount es la cantidad de respuestas correctas del nivel, no el número de nivel.
+        advanceAlfabeto(correctCount, totalRounds = 10) {
+            if (!this.player) {
+                return { levelUp: false, phaseUp: false, gameCompleted: false };
             }
-            
-            return { levelUp: false, phaseUp: false, gameCompleted: false };
+
+            const stats = this.player.gameStats.alfabeto;
+            if (correctCount < totalRounds || stats.completed) {
+                return {
+                    levelUp: false,
+                    phaseUp: false,
+                    gameCompleted: Boolean(stats.completed),
+                    newLevel: stats.currentLevel,
+                    newPhase: stats.currentPhase
+                };
+            }
+
+            // El nivel 4 es el cierre de Aventura: no se crea un nivel 5.
+            if (stats.currentLevel >= 4) {
+                stats.currentLevel = 4;
+                stats.maxLevelReached = Math.max(stats.maxLevelReached, 4);
+                stats.currentPhase = 3;
+                stats.completed = true;
+                this.unlockReward('llave_lluvia');
+                this.syncUnlockedZones();
+                this.saveGame();
+                return {
+                    levelUp: false,
+                    phaseUp: false,
+                    gameCompleted: true,
+                    newLevel: 4,
+                    newPhase: 3
+                };
+            }
+
+            const previousPhase = stats.currentPhase || 1;
+            stats.currentLevel++;
+            stats.maxLevelReached = Math.max(stats.maxLevelReached, stats.currentLevel);
+
+            // Las fases se habilitan progresivamente: nivel 1 = fase 1,
+            // nivel 2 = fases 1-2, niveles 3 y 4 = fases 1-3.
+            stats.currentPhase = Math.min(3, Math.max(previousPhase, stats.currentLevel - 1));
+            const phaseUp = stats.currentPhase > previousPhase;
+
+            this.saveGame();
+            return {
+                levelUp: true,
+                phaseUp,
+                gameCompleted: false,
+                newLevel: stats.currentLevel,
+                newPhase: stats.currentPhase
+            };
         }
         
         // Registrar progreso en Lluvia de Letras
