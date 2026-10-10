@@ -304,6 +304,18 @@ function al_getDistractors(target, count) {
     return shuffled.slice(0, count);
 }
 
+// Fases disponibles por nivel. Se alternan por ronda para cubrir la matriz pedagógica.
+function al_getPhaseForRound(level, round) {
+    const phasesByLevel = {
+        1: [1],
+        2: [1, 2],
+        3: [1, 2, 3],
+        4: [2, 3]
+    };
+    const phases = phasesByLevel[level] || phasesByLevel[4];
+    return phases[(Math.max(1, round) - 1) % phases.length];
+}
+
 function al_nextRound() {
     if (!al_gameState.isPlaying) return;
     
@@ -321,29 +333,34 @@ function al_nextRound() {
         // ¡Ha completado 10 letras correctamente!
         const levelCompleted = al_gameState.level;
         
-        // Registrar en gameCore si existe
+        // Registrar el cierre del nivel y consultar si Aventura terminó.
+        let gameCompleted = false;
         if (window.gameCore) {
-            const result = window.gameCore.advanceAlfabeto(levelCompleted, al_gameState.totalRounds);
-            
+            const result = window.gameCore.advanceAlfabeto(al_gameState.correctAnswers, al_gameState.totalRounds);
+            gameCompleted = Boolean(result.gameCompleted);
+
             if (result.levelUp) {
-                // Subió de nivel dentro del juego
+                // Subió de nivel dentro del juego.
                 al_gameState.level = result.newLevel;
-                
-                // Aplicar nueva configuración de dificultad
                 al_applyLevelConfig();
-                
-                // Guardar en gameCore para persistencia
                 window.gameCore.saveGame();
             }
-            
+
             if (result.phaseUp) {
-                al_gameState.phase = result.newPhase;
                 al_showPhaseUp();
-                al_applyLevelConfig();
+            }
+
+            // Mantener la fase persistida (máxima desbloqueada) separada de la fase de cada ronda.
+            if (result.newPhase) {
+                al_gameState.phase = result.newPhase;
             }
         } else {
-            // Sin gameCore, solo subir nivel manualmente
-            al_gameState.level++;
+            // Modo de respaldo si gameCore no está disponible.
+            if (levelCompleted >= 4) {
+                gameCompleted = true;
+            } else {
+                al_gameState.level++;
+            }
             al_applyLevelConfig();
         }
         
@@ -353,7 +370,7 @@ function al_nextRound() {
         al_createConfetti();
         
         // Mostrar overlay de nivel completado
-        al_showLevelCompleteOverlay(levelCompleted);
+        al_showLevelCompleteOverlay(levelCompleted, gameCompleted);
         
         // Reiniciar contadores para el nuevo nivel
         al_gameState.round = 0;
@@ -364,6 +381,9 @@ function al_nextRound() {
     }
     
     // ========== NUEVA LETRA (normal) ==========
+    // Elegir la fase activa de esta ronda según la matriz pedagógica acordada.
+    al_gameState.phase = al_getPhaseForRound(al_gameState.level, al_gameState.round);
+
     const config = al_LEVEL_CONFIG[al_gameState.level] || al_LEVEL_CONFIG[4];
     const phaseConfig = al_PHASE_CONFIG[al_gameState.phase];
     
@@ -605,7 +625,7 @@ function al_showStreak() {
     setTimeout(() => streakEl.remove(), 1000);
 }
 
-function al_showLevelCompleteOverlay(completedLevel) {
+function al_showLevelCompleteOverlay(completedLevel, gameCompleted = false) {
     // Crear overlay si no existe
     let overlay = document.getElementById('al_levelCompleteOverlay');
     if (!overlay) {
@@ -616,7 +636,7 @@ function al_showLevelCompleteOverlay(completedLevel) {
     }
     
     const nextLevel = al_gameState.level;
-    const isGameComplete = (completedLevel >= 3 && nextLevel > 3);
+    const isGameComplete = gameCompleted || completedLevel >= 4;
     
     let title = `🎉 ¡NIVEL ${completedLevel} COMPLETADO! 🎉`;
     let message = `✨ Siguiente: ${al_LEVEL_CONFIG[nextLevel]?.name || 'MODO DICTADO'} ✨`;
