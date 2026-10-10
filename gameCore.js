@@ -239,13 +239,14 @@
         
         // Registrar progreso en Aventura del Alfabeto.
         // correctCount es la cantidad de respuestas correctas del nivel, no el número de nivel.
-        advanceAlfabeto(correctCount, totalRounds = 10) {
+        advanceAlfabeto(correctCount, totalRounds = 10, maxErrors = 2) {
             if (!this.player) {
                 return { levelUp: false, phaseUp: false, gameCompleted: false };
             }
 
             const stats = this.player.gameStats.alfabeto;
-            if (correctCount < totalRounds || stats.completed) {
+            const requiredCorrect = Math.max(0, totalRounds - maxErrors);
+            if (correctCount < requiredCorrect || stats.completed) {
                 return {
                     levelUp: false,
                     phaseUp: false,
