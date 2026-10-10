@@ -61,6 +61,7 @@ function pe_nextWord() {
     const prizeMsg = document.getElementById('pe_prizeMsg');
     if (winOverlay) winOverlay.classList.remove('show');
     if (prizeMsg) prizeMsg.style.display = 'none';
+    pe_showFeedback('', '');
     
     const sourceAll = pe_getWordsFromAhorcado();
     let allowed = sourceAll;
@@ -137,9 +138,9 @@ function pe_letterClick(idx) {
         if (expected !== val) {
             const slotEls = document.querySelectorAll('#pe_wordSlots .pe-slot');
             if (slotEls[emptyIdx]) slotEls[emptyIdx].classList.add('error');
-            setTimeout(() => {
-                if (slotEls[emptyIdx]) slotEls[emptyIdx].classList.remove('error');
-            }, 500);
+            pe_showFeedback('Esa letra no va aquí. ¡Prueba otra!', 'error');
+        } else {
+            pe_showFeedback('¡Muy bien! Esa letra sí va aquí.', 'success');
         }
         pe_checkWin();
     }
@@ -155,6 +156,23 @@ function pe_slotClick(idx) {
             pe_render();
         }
     }
+}
+
+
+// Mensaje visible y accesible para indicar si la selección es correcta.
+function pe_showFeedback(message, type) {
+    const slots = document.getElementById('pe_wordSlots');
+    if (!slots) return;
+    let feedback = document.getElementById('pe_feedback');
+    if (!feedback) {
+        feedback = document.createElement('p');
+        feedback.id = 'pe_feedback';
+        feedback.setAttribute('role', 'status');
+        feedback.setAttribute('aria-live', 'polite');
+        slots.insertAdjacentElement('afterend', feedback);
+    }
+    feedback.textContent = message;
+    feedback.className = 'pe-feedback' + (type ? ' ' + type : '');
 }
 
 // palabras.js - Ruinas Antiguas
@@ -188,14 +206,19 @@ function pe_checkWin() {
             
             pe_updatePrizes();
             pe_renderCollection();
-            pe_showWinEffect();
-            pe_nextWord();
+            const winOverlay = document.getElementById('pe_winOverlay');
+            const prizeMsg = document.getElementById('pe_prizeMsg');
+            if (prizeMsg) {
+                prizeMsg.textContent = '¡Formaste ' + pe_state.currentWord + '! ¡Excelente trabajo!';
+                prizeMsg.style.display = 'block';
+            }
+            if (winOverlay) winOverlay.classList.add('show');
         } else {
-            // Palabra incorrecta
+            // Palabra incorrecta: dar retroalimentación y permitir corregir las letras.
             pe_state.streak = 0;
-            gameCore.registerWordResult(pe_state.currentWord, false);
-            pe_playHardError();
-            pe_showErrorEffect();
+            if (window.gameCore) gameCore.registerWordResult(pe_state.currentWord, false);
+            pe_showFeedback('Casi lo logras. Toca una letra de la palabra para cambiarla.', 'error');
+            document.querySelectorAll('#pe_wordSlots .pe-slot').forEach(slot => slot.classList.add('error'));
         }
     }
 }
