@@ -346,13 +346,14 @@ function al_nextRound() {
                 window.gameCore.saveGame();
             }
 
-            if (result.phaseUp) {
-                al_showPhaseUp();
-            }
-
             // Mantener la fase persistida (máxima desbloqueada) separada de la fase de cada ronda.
             if (result.newPhase) {
                 al_gameState.phase = result.newPhase;
+            }
+
+            if (result.phaseUp) {
+                al_showPhaseUp();
+                al_applyLevelConfig();
             }
         } else {
             // Modo de respaldo si gameCore no está disponible.
