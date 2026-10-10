@@ -637,11 +637,19 @@ function al_showLevelCompleteOverlay(completedLevel, gameCompleted = false) {
     
     const nextLevel = al_gameState.level;
     const isGameComplete = gameCompleted || completedLevel >= 4;
+    const levelPassed = gameCompleted || nextLevel > completedLevel;
     
     let title = `🎉 ¡NIVEL ${completedLevel} COMPLETADO! 🎉`;
     let message = `✨ Siguiente: ${al_LEVEL_CONFIG[nextLevel]?.name || 'MODO DICTADO'} ✨`;
     let buttonText = 'Continuar 🚀';
     let buttonAction = 'al_continueToNextLevel()';
+
+    if (!levelPassed) {
+        title = '💪 ¡Vamos a intentarlo otra vez!';
+        message = 'Necesitamos 10 respuestas correctas para avanzar. ¡Tú puedes!';
+        buttonText = 'Repetir nivel 🔁';
+        buttonAction = 'al_retryCurrentLevel()';
+    }
     
     if (isGameComplete) {
         title = '🌟 ¡BOSQUE DE LETRAS COMPLETADO! 🌟';
@@ -661,6 +669,23 @@ function al_showLevelCompleteOverlay(completedLevel, gameCompleted = false) {
     overlay.classList.add('show');
 }
 
+function al_retryCurrentLevel() {
+    const overlay = document.getElementById('al_levelCompleteOverlay');
+    if (overlay) overlay.classList.remove('show');
+    if (al_gameState.timer) clearInterval(al_gameState.timer);
+    if (window.gameCore) {
+        window.gameCore.resetSessionLives();
+        window.gameCore.saveGame();
+    }
+    al_gameState.lives = 3;
+    al_gameState.streak = 0;
+    al_gameState.round = 0;
+    al_gameState.correctAnswers = 0;
+    al_gameState.isPlaying = true;
+    al_applyLevelConfig();
+    al_updateUI();
+    al_nextRound();
+}
 function al_continueToNextLevel() {
     const overlay = document.getElementById('al_levelCompleteOverlay');
     if (overlay) overlay.classList.remove('show');
