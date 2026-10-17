@@ -228,3 +228,6 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); min-height: 100
 @media (max-width: 600px) {
     #palabras-app .pe-feedback { font-size: 1rem; margin: 8px auto 14px; }
 }
+
+#palabras-app > .game-container > .lang-selector { margin: 0 auto 12px; }
+#palabras-app .lang-selector .lang-btn { min-height: 40px; }
