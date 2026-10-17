@@ -41,6 +41,19 @@ function pe_startGame() {
         
     }
     pe_state = { currentWord: '', letters: [], slots: [], streak: pe_state.streak || 0, correctCount: 0, level: window.gameCore ? (window.gameCore.getGameStats('palabras').currentLevel || 1) : 1, recentWords: pe_state.recentWords || [] };
+    const en = lang === 'en';
+    const app = document.getElementById('palabras-app');
+    if (app) {
+        const h1 = app.querySelector('.header h1');
+        const subtitle = app.querySelector('.header .subtitle');
+        const labels = app.querySelectorAll('.score-item .label');
+        const prizeTitle = app.querySelector('.pe-prizes h3');
+        if (h1) h1.textContent = en ? '🧩 Hidden Words' : '🧩 Palabras Escondidas';
+        if (subtitle) subtitle.textContent = en ? 'Put the letters in order' : 'Ordena las letras';
+        if (labels[0]) labels[0].textContent = en ? 'Points' : 'Puntos';
+        if (labels[1]) labels[1].textContent = en ? 'Level' : 'Nivel';
+        if (prizeTitle) prizeTitle.textContent = en ? 'Magic Prize Collection 🎁' : 'Colección de Premios Mágicos 🎁';
+    }
     pe_updatePrizes();
     pe_renderCollection();
     pe_nextWord();
@@ -238,18 +251,18 @@ function pe_showGameComplete() {
     overlay.style.zIndex = '3000';
     overlay.innerHTML = `
         <div class="emoji">🏛️</div>
-        <h2>' + (window.gameCore.settings.language === 'en' ? 'RUINS EXPLORED!' : '¡RUINAS EXPLORADAS!') + '</h2>
-        <p class="word-reveal">' + (window.gameCore.settings.language === 'en' ? 'You reached level 8' : 'Has alcanzado el nivel 8') + '</p>
+        <h2>${window.gameCore.settings.language === 'en' ? 'RUINS EXPLORED!' : '¡RUINAS EXPLORADAS!'}</h2>
+        <p class="word-reveal">${window.gameCore.settings.language === 'en' ? 'You reached level 8' : 'Has alcanzado el nivel 8'}</p>
         <div style="font-size: 3rem; margin: 10px;">🔐</div>
-        <p>' + (window.gameCore.settings.language === 'en' ? 'You earned the TOWER KEY!' : '¡Has ganado la LLAVE DE LA TORRE!') + '</p>
-        <button class="restart-btn" onclick="pe_goToNextGame()">' + (window.gameCore.settings.language === 'en' ? '✨ Go to the Magic Tower ✨' : '✨ Ir a la Torre Mágica ✨') + '</button>
+        <p>${window.gameCore.settings.language === 'en' ? 'You earned the TOWER KEY!' : '¡Has ganado la LLAVE DE LA TORRE!'}</p>
+        <button class="restart-btn" onclick="pe_goToNextGame()">${window.gameCore.settings.language === 'en' ? '✨ Go to the Magic Tower ✨' : '✨ Ir a la Torre Mágica ✨'}</button>
     `;
     document.getElementById('palabras-app').appendChild(overlay);
     overlay.classList.add('show');
 }
 
 function pe_goToNextGame() {
-    alert('🎉 ¡Felicidades! Has completado las Ruinas Antiguas.\n\n🎪 Ahora puedes jugar TORRE MÁGICA (Ahorcado)');
+    alert(window.gameCore.settings.language === 'en' ? '🎉 Congratulations! You completed the Ancient Ruins.\n\n🎪 Now you can play MAGIC TOWER (Hangman).' : '🎉 ¡Felicidades! Has completado las Ruinas Antiguas.\n\n🎪 Ahora puedes jugar TORRE MÁGICA (Ahorcado)');
     if (typeof showMainMenu === 'function') {
         showMainMenu();
     } else {
