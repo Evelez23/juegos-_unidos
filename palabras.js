@@ -53,6 +53,10 @@ function pe_startGame() {
         if (labels[0]) labels[0].textContent = en ? 'Points' : 'Puntos';
         if (labels[1]) labels[1].textContent = en ? 'Level' : 'Nivel';
         if (prizeTitle) prizeTitle.textContent = en ? 'Magic Prize Collection 🎁' : 'Colección de Premios Mágicos 🎁';
+        const overlayTitle = app.querySelector('#pe_winOverlay h2');
+        const nextButton = app.querySelector('#pe_winOverlay .restart-btn');
+        if (overlayTitle) overlayTitle.textContent = en ? 'GREAT JOB!' : '¡EXCELENTE!';
+        if (nextButton) nextButton.textContent = en ? 'Next Word 🚀' : 'Siguiente Palabra 🚀';
     }
     pe_updatePrizes();
     pe_renderCollection();
