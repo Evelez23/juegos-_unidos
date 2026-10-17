@@ -2,7 +2,7 @@
 
 // Diccionario progresivo por nivel.
 const PE_WORDS = [
-{word:'OSO',emoji:'🐻',level:1},{word:'SOL',emoji:'☀️',level:1},{word:'PAN',emoji:'🍞',level:1},{word:'PEZ',emoji:'🐟',level:1},{word:'GATO',emoji:'🐱',level:1},{word:'VACA',emoji:'🐮',level:1},{word:'MESA',emoji:'🪑',level:1},{word:'CASA',emoji:'🏠',level:1},{word:'MAMA',emoji:'👩',level:1},{word:'PAPA',emoji:'👨',level:1},{word:'LEON',emoji:'🦁',level:1},{word:'PATO',emoji:'🦆',level:1},{word:'MANO',emoji:'✋',level:1},{word:'LUNA',emoji:'🌙',level:1},{word:'DEDO',emoji:'☝️',level:1},{word:'BOTA',emoji:'🥾',level:1},{word:'ROSA',emoji:'🌹',level:1},{word:'UVA',emoji:'🍇',level:1},{word:'NENE',emoji:'👶',level:1},{word:'PERRO',emoji:'🐶',level:1},{word:'NINO',emoji:'🧒',level:1},{word:'GALLETA',emoji:'🍪',level:1},
+{word:'OSO',emoji:'🐻',level:1},{word:'SOL',emoji:'☀️',level:1},{word:'JAM',emoji:'🍓',level:1},{word:'PEZ',emoji:'🐟',level:1},{word:'GATO',emoji:'🐱',level:1},{word:'VACA',emoji:'🐮',level:1},{word:'MESA',emoji:'🪑',level:1},{word:'CASA',emoji:'🏠',level:1},{word:'MAMA',emoji:'👩',level:1},{word:'PAPA',emoji:'👨',level:1},{word:'LEON',emoji:'🦁',level:1},{word:'PATO',emoji:'🦆',level:1},{word:'MANO',emoji:'✋',level:1},{word:'LUNA',emoji:'🌙',level:1},{word:'DEDO',emoji:'☝️',level:1},{word:'BOTA',emoji:'🥾',level:1},{word:'ROSA',emoji:'🌹',level:1},{word:'UVA',emoji:'🍇',level:1},{word:'NENE',emoji:'👶',level:1},{word:'PERRO',emoji:'🐶',level:1},{word:'NINO',emoji:'🧒',level:1},{word:'GALLETA',emoji:'🍪',level:1},
 {word:'ARBOL',emoji:'🌳',level:2},{word:'ABUELA',emoji:'👵',level:2},{word:'ABUELO',emoji:'👴',level:2},{word:'HERMANO',emoji:'👦',level:2},{word:'GALLINA',emoji:'🐔',level:2},{word:'CONEJO',emoji:'🐰',level:2},{word:'CABALLO',emoji:'🐴',level:2},{word:'HELADO',emoji:'🍦',level:2},{word:'QUESO',emoji:'🧀',level:2},{word:'PIZZA',emoji:'🍕',level:2},{word:'PELOTA',emoji:'⚽',level:2},{word:'ZAPATO',emoji:'👟',level:2},{word:'CAMISA',emoji:'👕',level:2},{word:'VENTANA',emoji:'🪟',level:2},{word:'CUADRADO',emoji:'🟦',level:2},{word:'CALCETIN',emoji:'🧦',level:2},{word:'MARIPOSA',emoji:'🦋',level:2},{word:'ESCUELA',emoji:'🏫',level:2},{word:'MOCHILA',emoji:'🎒',level:2},{word:'TORTUGA',emoji:'🐢',level:2},
 {word:'ELEFANTE',emoji:'🐘',level:3},{word:'SERPIENTE',emoji:'🐍',level:3},{word:'TELEVISION',emoji:'📺',level:3},{word:'DINOSAURIO',emoji:'🦕',level:3},{word:'CHOCOLATE',emoji:'🍫',level:3},{word:'MARINERO',emoji:'⚓',level:3},{word:'ZANAHORIA',emoji:'🥕',level:3},{word:'COCODRILO',emoji:'🐊',level:3},{word:'BICICLETA',emoji:'🚲',level:3},{word:'CUMPLEANOS',emoji:'🎂',level:3},{word:'HERMANITA',emoji:'👧',level:3},{word:'UNIVERSO',emoji:'🌌',level:3},{word:'CAMIONETA',emoji:'🚙',level:3},{word:'ARCOIRIS',emoji:'🌈',level:3},
 {word:'MARIPOSITA',emoji:'🦋',level:4},{word:'COMPUTADORA',emoji:'💻',level:4},{word:'HIPOPOTAMO',emoji:'🦛',level:4},{word:'REFRIGERADOR',emoji:'🧊',level:4},{word:'BOMBERO',emoji:'🚒',level:4},{word:'BIBLIOTECA',emoji:'📚',level:4},{word:'CUMPLEANERO',emoji:'🎉',level:4},{word:'FERROCARRIL',emoji:'🚂',level:4},{word:'ABRACADABRA',emoji:'✨',level:4},{word:'ESPANTAPAJAROS',emoji:'🎃',level:4},
@@ -309,6 +309,19 @@ function pe_setLanguage(lang) {
     if (lang !== 'es' && lang !== 'en') return;
     if (window.gameCore) window.gameCore.setLanguage(lang);
     document.querySelectorAll('#palabras-app .lang-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+    const en = lang === 'en';
+    const app = document.getElementById('palabras-app');
+    if (app) {
+        const h1 = app.querySelector('.header h1');
+        const subtitle = app.querySelector('.header .subtitle');
+        const labels = app.querySelectorAll('.score-item .label');
+        const prizeTitle = app.querySelector('.pe-prizes h3');
+        if (h1) h1.textContent = en ? '🧩 Hidden Words' : '🧩 Palabras Escondidas';
+        if (subtitle) subtitle.textContent = en ? 'Put the letters in order' : 'Ordena las letras';
+        if (labels[0]) labels[0].textContent = en ? 'Points' : 'Puntos';
+        if (labels[1]) labels[1].textContent = en ? 'Level' : 'Nivel';
+        if (prizeTitle) prizeTitle.textContent = en ? 'Magic Prize Collection 🎁' : 'Colección de Premios Mágicos 🎁';
+    }
     pe_updatePrizes();
     pe_renderCollection();
     pe_nextWord();
