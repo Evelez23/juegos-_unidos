@@ -11,8 +11,20 @@ const PE_WORDS = [
 {word:'EXTRAORDINARIO',emoji:'🌟',level:7},{word:'ELECTRODOMESTICO',emoji:'🔌',level:7},{word:'RESPONSABILIDAD',emoji:'🏅',level:7},{word:'IMAGINACION',emoji:'💭',level:7},
 {word:'SUPERCALIFRAGILISTICO',emoji:'🪄',level:8},{word:'INDEPENDIENTEMENTE',emoji:'🚀',level:8}
 ];
+const PE_WORDS_EN = [
+{word:'CAT',emoji:'🐱',level:1},{word:'DOG',emoji:'🐶',level:1},{word:'SUN',emoji:'☀️',level:1},{word:'PAN',emoji:'🍞',level:1},{word:'FISH',emoji:'🐟',level:1},{word:'COW',emoji:'🐮',level:1},{word:'MOM',emoji:'👩',level:1},{word:'DAD',emoji:'👨',level:1},{word:'BEAR',emoji:'🐻',level:1},{word:'LION',emoji:'🦁',level:1},{word:'DUCK',emoji:'🦆',level:1},{word:'MOON',emoji:'🌙',level:1},{word:'ROSE',emoji:'🌹',level:1},{word:'BABY',emoji:'👶',level:1},{word:'BOY',emoji:'🧒',level:1},{word:'GIRL',emoji:'👧',level:1},
+{word:'TREE',emoji:'🌳',level:2},{word:'GRANDMA',emoji:'👵',level:2},{word:'GRANDPA',emoji:'👴',level:2},{word:'BROTHER',emoji:'👦',level:2},{word:'CHICKEN',emoji:'🐔',level:2},{word:'RABBIT',emoji:'🐰',level:2},{word:'HORSE',emoji:'🐴',level:2},{word:'ICECREAM',emoji:'🍦',level:2},{word:'CHEESE',emoji:'🧀',level:2},{word:'PIZZA',emoji:'🍕',level:2},{word:'BALL',emoji:'⚽',level:2},{word:'SHOE',emoji:'👟',level:2},{word:'SHIRT',emoji:'👕',level:2},{word:'WINDOW',emoji:'🪟',level:2},{word:'SQUARE',emoji:'🟦',level:2},{word:'SCHOOL',emoji:'🏫',level:2},
+{word:'ELEPHANT',emoji:'🐘',level:3},{word:'SNAKE',emoji:'🐍',level:3},{word:'TELEVISION',emoji:'📺',level:3},{word:'DINOSAUR',emoji:'🦕',level:3},{word:'CHOCOLATE',emoji:'🍫',level:3},{word:'CARROT',emoji:'🥕',level:3},{word:'CROCODILE',emoji:'🐊',level:3},{word:'BICYCLE',emoji:'🚲',level:3},{word:'UNIVERSE',emoji:'🌌',level:3},{word:'RAINBOW',emoji:'🌈',level:3},
+{word:'BUTTERFLY',emoji:'🦋',level:4},{word:'COMPUTER',emoji:'💻',level:4},{word:'HIPPOPOTAMUS',emoji:'🦛',level:4},{word:'FIREFIGHTER',emoji:'🚒',level:4},{word:'LIBRARY',emoji:'📚',level:4},{word:'TRAIN',emoji:'🚂',level:4},{word:'SCARECROW',emoji:'🎃',level:4},
+{word:'CONSTELLATION',emoji:'🌠',level:5},{word:'HELICOPTER',emoji:'🚁',level:5},{word:'ADVENTURER',emoji:'🧭',level:5},{word:'WONDERFUL',emoji:'⭐',level:5},{word:'ASTRONAUT',emoji:'👨‍🚀',level:5},
+{word:'TRANSPORTATION',emoji:'🚚',level:6},{word:'EXPLORER',emoji:'🧭',level:6},{word:'FIREFLIES',emoji:'✨',level:6},{word:'PUZZLE',emoji:'🧩',level:6},
+{word:'EXTRAORDINARY',emoji:'🌟',level:7},{word:'ELECTRICITY',emoji:'🔌',level:7},{word:'RESPONSIBILITY',emoji:'🏅',level:7},{word:'IMAGINATION',emoji:'💭',level:7},
+{word:'INDEPENDENTLY',emoji:'🚀',level:8},{word:'SUPERSTAR',emoji:'🌟',level:8}
+];
 function pe_getWordsFromAhorcado() {
- return PE_WORDS.map(item => ({w:item.word.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/Ñ/g,'N'),e:item.emoji,level:item.level}));
+  const lang = window.gameCore && window.gameCore.settings ? window.gameCore.settings.language : 'es';
+  const source = lang === 'en' ? PE_WORDS_EN : PE_WORDS;
+  return source.map(item => ({w:item.word.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/Ñ/g,'N'),e:item.emoji,level:item.level}));
 }
 let pe_state = { currentWord: '', letters: [], slots: [], streak: 0, correctCount: 0, level: 1, recentWords: [] };
 
@@ -65,7 +77,7 @@ function pe_nextWord() {
         const synth = window.speechSynthesis;
         synth.cancel();
         const utter = new SpeechSynthesisUtterance(wordObj.w);
-        utter.lang = 'es-ES';
+        utter.lang = (window.gameCore && window.gameCore.settings && window.gameCore.settings.language === 'en') ? 'en-US' : 'es-ES';
         utter.rate = 0.7;
         synth.speak(utter);
     } catch(e) {}
@@ -124,9 +136,9 @@ function pe_letterClick(idx) {
         if (expected !== val) {
             const slotEls = document.querySelectorAll('#pe_wordSlots .pe-slot');
             if (slotEls[emptyIdx]) slotEls[emptyIdx].classList.add('error');
-            pe_showFeedback('Esa letra no va aquí. ¡Prueba otra!', 'error');
+            pe_showFeedback(window.gameCore.settings.language === 'en' ? 'That letter does not go here. Try another!' : 'Esa letra no va aquí. ¡Prueba otra!', 'error');
         } else {
-            pe_showFeedback('¡Muy bien! Esa letra sí va aquí.', 'success');
+            pe_showFeedback(window.gameCore.settings.language === 'en' ? 'Great job! That letter belongs here.' : '¡Muy bien! Esa letra sí va aquí.', 'success');
         }
         pe_checkWin();
     }
@@ -197,7 +209,7 @@ function pe_checkWin() {
                 pe_state.level++;
                 pe_state.correctCount = 0;
                 const result = gameCore.advancePalabras(pe_state.level);
-                pe_showFeedback('🎉 ¡Subiste al nivel ' + pe_state.level + '! ¡Nuevas palabras te esperan!', 'success');
+                pe_showFeedback(window.gameCore.settings.language === 'en' ? '🎉 You reached level ' + pe_state.level + '! New words are waiting!' : '🎉 ¡Subiste al nivel ' + pe_state.level + '! ¡Nuevas palabras te esperan!', 'success');
                 if (result.gameCompleted) setTimeout(() => pe_showGameComplete(), 700);
             }
             
@@ -206,7 +218,7 @@ function pe_checkWin() {
             const winOverlay = document.getElementById('pe_winOverlay');
             const prizeMsg = document.getElementById('pe_prizeMsg');
             if (prizeMsg) {
-                prizeMsg.textContent = '¡Formaste ' + pe_state.currentWord + '! ¡Excelente trabajo!';
+                prizeMsg.textContent = window.gameCore.settings.language === 'en' ? 'You spelled ' + pe_state.currentWord + '! Excellent work!' : '¡Formaste ' + pe_state.currentWord + '! ¡Excelente trabajo!';
                 prizeMsg.style.display = 'block';
             }
             if (winOverlay) winOverlay.classList.add('show');
@@ -214,7 +226,7 @@ function pe_checkWin() {
             // Palabra incorrecta: dar retroalimentación y permitir corregir las letras.
             pe_state.streak = 0;
             if (window.gameCore) gameCore.registerWordResult(pe_state.currentWord, false);
-            pe_showFeedback('Casi lo logras. Toca una letra de la palabra para cambiarla.', 'error');
+            pe_showFeedback(window.gameCore.settings.language === 'en' ? 'Almost! Tap a letter in the word to change it.' : 'Casi lo logras. Toca una letra de la palabra para cambiarla.', 'error');
             document.querySelectorAll('#pe_wordSlots .pe-slot').forEach(slot => slot.classList.add('error'));
         }
     }
@@ -280,10 +292,15 @@ function pe_renderCollection() {
 }
 
 // Funciones globales necesarias
-function gc_setLangAndRefresh(lang) {
+function pe_setLanguage(lang) {
+    if (lang !== 'es' && lang !== 'en') return;
     if (window.gameCore) window.gameCore.setLanguage(lang);
-    if (typeof pe_nextWord === 'function') pe_nextWord();
+    document.querySelectorAll('#palabras-app .lang-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+    pe_updatePrizes();
+    pe_renderCollection();
+    pe_nextWord();
 }
+function gc_setLangAndRefresh(lang) { pe_setLanguage(lang); }
 
 function gc_refreshHeaderLabels() {
     // Para compatibilidad
