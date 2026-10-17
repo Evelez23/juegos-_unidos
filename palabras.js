@@ -226,11 +226,11 @@ function pe_showGameComplete() {
     overlay.style.zIndex = '3000';
     overlay.innerHTML = `
         <div class="emoji">🏛️</div>
-        <h2>¡RUINAS EXPLORADAS!</h2>
-        <p class="word-reveal">Has alcanzado el nivel 8</p>
+        <h2>' + (window.gameCore.settings.language === 'en' ? 'RUINS EXPLORED!' : '¡RUINAS EXPLORADAS!') + '</h2>
+        <p class="word-reveal">' + (window.gameCore.settings.language === 'en' ? 'You reached level 8' : 'Has alcanzado el nivel 8') + '</p>
         <div style="font-size: 3rem; margin: 10px;">🔐</div>
-        <p>¡Has ganado la LLAVE DE LA TORRE!</p>
-        <button class="restart-btn" onclick="pe_goToNextGame()">✨ Ir a la Torre Mágica ✨</button>
+        <p>' + (window.gameCore.settings.language === 'en' ? 'You earned the TOWER KEY!' : '¡Has ganado la LLAVE DE LA TORRE!') + '</p>
+        <button class="restart-btn" onclick="pe_goToNextGame()">' + (window.gameCore.settings.language === 'en' ? '✨ Go to the Magic Tower ✨' : '✨ Ir a la Torre Mágica ✨') + '</button>
     `;
     document.getElementById('palabras-app').appendChild(overlay);
     overlay.classList.add('show');
@@ -263,7 +263,7 @@ function pe_updatePrizes() {
 
 function pe_renderCollection() {
     const title = document.getElementById('pe_collectionTitle');
-    if (title) title.textContent = 'Colección de Recompensas';
+    if (title) title.textContent = window.gameCore && window.gameCore.settings.language === 'en' ? 'Rewards Collection' : 'Colección de Recompensas';
     const grid = document.getElementById('pe_collectionGrid');
     if (!grid) return;
     grid.innerHTML = '';
